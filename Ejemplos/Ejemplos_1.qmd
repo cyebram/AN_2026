@@ -1,0 +1,29 @@
+---
+title: "Preliminares Python y Representación Numérica"
+format: html
+---
+
+# Listas
+
+Las listas en Python son estructuras de datos que permiten almacenar múltiples valores en una sola variable. Son mutables, lo que significa que se pueden modificar después de su creación. A continuación, se presentan algunas operaciones básicas con listas.
+
+Crear una lista cuyos elementos sean números, posteriormente aplicar diferents funciones y métodos de listas.
+
+```{python}
+lista_1 = [1, 2, 85, 4, 7]
+lista_1
+```
+
+Método `append()`: Agrega un elemento al final de la lista.
+
+```{python}
+lista_1.append(10)
+lista_1
+```
+
+Método `extend()`: Agrega múltiples elementos al final de la lista.
+
+```{python}
+lista_1.extend([20, 30, 40])
+lista_1
+```
