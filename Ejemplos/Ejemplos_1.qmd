@@ -1,29 +1,92 @@
 ---
 title: "Preliminares Python y Representación Numérica"
-format: html
+format: 
+  html:
+    grid:
+      body-width: 1200px
 ---
+
+# Tipos de datos en Python
+
 
 # Listas
 
 Las listas en Python son estructuras de datos que permiten almacenar múltiples valores en una sola variable. Son mutables, lo que significa que se pueden modificar después de su creación. A continuación, se presentan algunas operaciones básicas con listas.
 
-Crear una lista cuyos elementos sean números, posteriormente aplicar diferents funciones y métodos de listas.
+Crear una lista cuyos elementos sean números, posteriormente aplicar diferentes métodos y funciones de listas.
 
-```{python}
-lista_1 = [1, 2, 85, 4, 7]
-lista_1
-```
+## Métodos comunes con listas
 
 Método `append()`: Agrega un elemento al final de la lista.
 
-```{python}
-lista_1.append(10)
-lista_1
-```
-
 Método `extend()`: Agrega múltiples elementos al final de la lista.
 
+Método `index()`: Devuelve el índice del primer elemento con el valor especificado.
+
+Notemos que Python utiliza índices basados en cero, es decir, el primer elemento de la lista tiene un índice de 0.
+
+Método `reverse()`: Invierte el orden de los elementos en la lista.
+
+Método `sort()`: Ordena los elementos de la lista en orden ascendente.
+
+
+## Funciones comunes con listas
+
+Función `len()`: Devuelve la longitud (número de elementos) de la lista.
+
+Función `min()`: Devuelve el valor mínimo de la lista.
+
+Función `max()`: Devuelve el valor máximo de la lista.
+
+Función `sum()`: Devuelve la suma de todos los elementos de la lista.
+
+Función `list()`: Convierte un iterable (como una tupla, un rango o una cadena) en una lista.
+
+# Ciclo for
+
+Aplicar un ciclo `for` a los elementos de una lista.
+
+
+# Módulo math
+
+El módulo `math` en Python proporciona funciones matemáticas definidas por el estándar C. A continuación, se presentan algunas funciones comunes del módulo `math`.
+
+Importar el módulo `math` y utilizar algunas de sus funciones.
+
+
 ```{python}
-lista_1.extend([20, 30, 40])
-lista_1
+import math
 ```
+
+# Funciones
+
+## Función para convertir binario a decimal
+
+Escribir una función llamada `my_bin_2_dec(b)` que convierta un número binario b (representado como una cadena de caracteres) a su equivalente decimal. La función debe tomar una cadena como entrada y devolver un entero como salida. Y comparar el resultado con la función integrada `int(b, 2)`.
+
+
+## Función para convertir decimal a binario
+
+Escribir una función llamada `my_dec_2_bin(n)` que convierta un número decimal n (entero positivo) a su equivalente binario representado como una cadena de caracteres. La función debe tomar un entero como entrada y devolver una cadena como salida. Y comparar el resultado con la función integrada `bin(n)[2:]`.
+
+
+
+# Representación IEEE 754
+
+```{python}
+import struct
+numero = 15
+
+bits_64 = struct.unpack('>Q', struct.pack('>d', numero))[0]
+binario_64 = f"{bits_64:064b}"
+
+print(binario_64)
+```
+
+**Descripción**:
+
+1.  `struct.pack`: Convierte un número de punto flotante a su representación binaria en formato IEEE 754. Los formatos `'>f'` y `'>d'` indican precisión simple y doble, respectivamente.
+
+2.  `struct.unpack`: Interpreta los datos binarios como enteros sin signo (`'>I'` para 32 bits, `'>Q'` para 64 bits).
+
+3.  Formato binario: Los enteros obtenidos se convierten a binarios utilizando una cadena de formato con ceros iniciales (`f"{bits_64:064b}"`).
