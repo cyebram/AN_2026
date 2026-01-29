@@ -42,9 +42,14 @@ Función `sum()`: Devuelve la suma de todos los elementos de la lista.
 
 Función `list()`: Convierte un iterable (como una tupla, un rango o una cadena) en una lista.
 
+# Condicionales
+
+
 # Ciclo for
 
 Aplicar un ciclo `for` a los elementos de una lista.
+
+# Ciclo while
 
 
 # Módulo math
@@ -64,10 +69,35 @@ import math
 
 Escribir una función llamada `my_bin_2_dec(b)` que convierta un número binario b (representado como una cadena de caracteres) a su equivalente decimal. La función debe tomar una cadena como entrada y devolver un entero como salida. Y comparar el resultado con la función integrada `int(b, 2)`.
 
+```{python}
+def my_bin_2_dec(bin):
+  bin_lista = list(bin)
+  bin_lista.reverse()
+  d = 0
+  exponente = 0
+  for bit in bin_lista:
+    d = d + int(bit) * 2**exponente
+    exponente +=1
+  return d 
+```
+
+
+Prueba
+
+```{python}
+my_bin_2_dec("10111")
+```
+
+
+```{python}
+int("10111",2)
+```
+
 
 ## Función para convertir decimal a binario
 
 Escribir una función llamada `my_dec_2_bin(n)` que convierta un número decimal n (entero positivo) a su equivalente binario representado como una cadena de caracteres. La función debe tomar un entero como entrada y devolver una cadena como salida. Y comparar el resultado con la función integrada `bin(n)[2:]`.
+
 
 
 
