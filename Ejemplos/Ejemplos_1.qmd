@@ -89,6 +89,8 @@ my_bin_2_dec("10111")
 ```
 
 
+Verificación con la función integrada
+
 ```{python}
 int("10111",2)
 ```
@@ -97,6 +99,35 @@ int("10111",2)
 ## Función para convertir decimal a binario
 
 Escribir una función llamada `my_dec_2_bin(n)` que convierta un número decimal n (entero positivo) a su equivalente binario representado como una cadena de caracteres. La función debe tomar un entero como entrada y devolver una cadena como salida. Y comparar el resultado con la función integrada `bin(n)[2:]`.
+
+
+```{python}
+def my_dec_2_bin(n):
+  if n == 0:
+    return "0"
+  q = n
+  binario = []
+  while q > 0:
+    residuo = q % 2
+    binario.append(str(residuo))
+    q = q // 2
+  binario.reverse()
+  return "".join(binario)
+```
+
+
+Prueba
+
+```{python}
+my_dec_2_bin(23)
+```
+
+
+Verificación con la función integrada
+
+```{python}
+bin(23)[2:]
+```
 
 
 
@@ -120,3 +151,36 @@ print(binario_64)
 2.  `struct.unpack`: Interpreta los datos binarios como enteros sin signo (`'>I'` para 32 bits, `'>Q'` para 64 bits).
 
 3.  Formato binario: Los enteros obtenidos se convierten a binarios utilizando una cadena de formato con ceros iniciales (`f"{bits_64:064b}"`).
+
+
+Brecha entre números
+
+
+```{python}
+import numpy as np
+np.spacing(1e9)
+```
+
+
+
+```{python}
+1e9 == 1e9 + np.spacing(1e9)/3
+```
+
+Cuando el número es muy grande, la brecha entre números representables también es grande. Por otro lado, cuando el número es pequeño, la brecha entre números representables es pequeña, como se observa a continuación:
+
+```{python}
+np.spacing(10)
+```
+
+# Errores de redondeo
+
+```{python}
+4.9-4.845 == 0.055
+```
+
+A pesar que el resultado matemático es correcto, Python no puede representarlo exactamente debido a limitaciones en la representación de números de punto flotante.
+
+```{python}
+4.9-4.845
+```

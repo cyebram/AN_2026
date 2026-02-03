@@ -1,0 +1,42 @@
+---
+title: "Ejemplos 3. Métodos para encontrar raíces de funciones"
+lang: es
+format: 
+  html:
+    grid:
+      body-width: 1200px
+---
+
+::: {#exm-bis1}
+Aproxima la raíz de la función $f(x)= x^3+4x^2-10$ en el intervalo $[1,2]$ por medio del método de bisección
+:::
+
+A continuación se muestra la gráfica de la función en el intervalo $[1,2]$ y en los subintervalos que resultan al aplicar tres iteraciones del método de bisección.
+
+
+
+Creamos una función para el método de bisección:
+
+
+Aplicamos la función `mi_biseccion` a la función y se muestran los resultados.
+
+
+
+::: {#exm-bis2}
+Aproximar la raiz de la función $f(x)=\sqrt{x}-sen(x)-1$.
+:::
+
+Inicialmente se realiza la gráfica de la función (notemos que está definida para $x\geq0$)
+
+
+
+A partir de la gráfica podemos concluir que existe una raíz en el intervalo $[2,3]$, se aproxima utilizando la función `mi_biseccion` y la función `optimize.bisect` de Scipy:
+
+
+Creamos una función (sin manejo de excepciones o errores) para el método de Newton-Raphson:
+
+
+
+En este caso es necesario brindar también la derivada de la función, $f'(x)=\frac{1}{2\sqrt{x}}-cos(x)$, aproximamos la raíz de la función con `my_newton` con un valor inicial de $x_0=2$.
+
+También se puede utilizar la función `optimize.newton` de Scipy:
