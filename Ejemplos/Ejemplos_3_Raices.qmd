@@ -7,36 +7,237 @@ format:
       body-width: 1200px
 ---
 
+```{python}
+#| code-fold: true
+
+import numpy as np
+import matplotlib.pyplot as plt
+```
+
+
 ::: {#exm-bis1}
 Aproxima la raíz de la función $f(x)= x^3+4x^2-10$ en el intervalo $[1,2]$ por medio del método de bisección
 :::
 
 A continuación se muestra la gráfica de la función en el intervalo $[1,2]$ y en los subintervalos que resultan al aplicar tres iteraciones del método de bisección.
 
+```{python}
+#| code-fold: true
+f = lambda x: x **3 +4*x**2 -10
+
+x = np.linspace(1, 2, 100)
+y = f(x)
+
+x1 = np.linspace(1, 1.5, 100)
+y1 = f(x1)
+
+x2 = np.linspace(1.25, 1.5, 100)
+y2 = f(x2)
+
+x3 = np.linspace(1.25, 1.375, 100)
+y3 = f(x3)
+
+# Crear gráfica
+plt.figure(figsize=(8,6)) # Tamaño en pulgadas
+plt.plot(x,y, color ="black", label = "Inicial")
+plt.plot(x1, y1, color = "red", label = "Iteración 1")
+plt.plot(x2, y2, color = "blue", label = "Iteración 2")
+plt.plot(x3, y3, color = "goldenrod", label = "Iteración 3", linewidth = 1.5) 
+plt.axhline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje x
+#plt.axvline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje x
+
+# Personalizar gráfica
+#plt.title(r"Gráfica de la función $f(x)=e^x-3x^2$", fontsize= 14)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.legend()
+plt.grid()
+
+plt.show()
+```
+
+
 
 
 Creamos una función para el método de bisección:
+
+```{python}
+#| code-fold: true
+
+def mi_biseccion(f, a, b, tol = 1e-6, it_max=100):
+  if np.sign(f(a)) == np.sign(f(b)):
+    raise Exception("Los extremos del intervalo no cumplen con los criterios del método")
+  iteracion = 0
+  while iteracion< it_max:
+    m = a +(b-a)/2
+    if np.abs(f(m))< tol:
+      iteracion +=1
+      convergencia = True
+      return m, iteracion, convergencia
+    elif np.sign(f(a)) == np.sign(f(m)):
+      a = m
+      iteracion +=1
+    else:
+      b = m
+      iteracion +=1
+  convergencia = False
+  return m, iteracion, convergencia    
+
+
+```
+
 
 
 Aplicamos la función `mi_biseccion` a la función y se muestran los resultados.
 
 
+```{python}
+raiz, iteraciones, convergencia = mi_biseccion(f, 1, 2, tol = 1e-9, it_max= 150)
+
+print(f"Después de {iteraciones} iteraciones la convergencia es: {convergencia}")
+print("-----------")
+print(f"La aproximación de la raíz es: {raiz}")
+```
+
+
+Ahora calculamos la raíz con la función bisect:
+
+```{python}
+from scipy import optimize
+
+raiz, raiz_info = optimize.bisect(f, 1, 2, full_output=True)
+
+print(raiz_info)
+
+print(f"La aproximación de la raíz es: {raiz}")
+
+```
 
 ::: {#exm-bis2}
 Aproximar la raiz de la función $f(x)=\sqrt{x}-sen(x)-1$.
 :::
 
+
+
 Inicialmente se realiza la gráfica de la función (notemos que está definida para $x\geq0$)
+
+```{python}
+#| code-fold: true
+
+f = lambda x: np.sqrt(x) - np.sin(x) -1
+
+x = np.linspace(0, 5, 100)
+y = f(x)
+# Crear gráfica
+plt.figure(figsize=(8,6)) # Tamaño en pulgadas
+plt.plot(x,y, color ="firebrick") 
+plt.axhline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje x
+plt.axvline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje x
+
+# Personalizar gráfica
+#plt.title(r"Gráfica de la función $f(x)=log(e^x+2)$", fontsize= 14)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+
+plt.show()
+```
 
 
 
 A partir de la gráfica podemos concluir que existe una raíz en el intervalo $[2,3]$, se aproxima utilizando la función `mi_biseccion` y la función `optimize.bisect` de Scipy:
 
+```{python}
+#| code-fold: true
 
-Creamos una función (sin manejo de excepciones o errores) para el método de Newton-Raphson:
+raiz, iteraciones, convergencia = mi_biseccion(f, 2, 3, tol = 1e-9, it_max= 150)
+
+print(f"Después de {iteraciones} iteraciones la convergencia es: {convergencia}")
+print("-----------")
+print(f"La aproximación de la raíz es: {raiz}")
+```
 
 
+```{python}
+#| code-fold: true
 
-En este caso es necesario brindar también la derivada de la función, $f'(x)=\frac{1}{2\sqrt{x}}-cos(x)$, aproximamos la raíz de la función con `my_newton` con un valor inicial de $x_0=2$.
+raiz, raiz_info = optimize.bisect(f, 2, 3, full_output=True)
+
+print(raiz_info)
+print("-----------------")
+print(f"La aproximación de la raíz es: {raiz}")
+```
+
+Antes de crear una función (sin manejo de excepciones o errores) para el método de Newton-Raphson, recordemos que también es necesario brindar también la derivada de la función, $f'(x)=\frac{1}{2\sqrt{x}}-cos(x)$. Llevemos a cabo algunas iteraciones paso a paso para aproximar la raíz de la función, con un valor inicial de $x_0=4$.
+
+
+```{python}
+df = lambda x: 0.5/np.sqrt(x) - np.cos(x)
+newton_r = lambda x: x - f(x)/df(x)
+
+x0 = 4
+print(f"Valor inicial: {x0}")
+x1 = newton_r(x0)
+print(f"Iteración 1: {x1}")
+x2 = newton_r(x1)
+print(f"Iteración 2: {x2}")
+x3 = newton_r(x2)
+print(f"Iteración 3: {x3}")
+x4 = newton_r(x3)
+print(f"Iteración 4: {x4}")
+
+print("-----------------")
+print(f"Valor de la función en la última iteración: {f(x4)}")
+```
+
+Ahora creamos una función para el método de Newton-Raphson, denominada `my_newton`:
+
+```{python}
+def my_newton(f, x0, fprime, tol = 1e-6, it_max=100):
+  iteracion = 0
+  while iteracion < it_max:
+    x1 = x0 - f(x0)/fprime(x0)
+    if np.abs(f(x1))< tol:
+      iteracion +=1
+      convergencia = True
+      return x1, iteracion, convergencia
+    else:
+      x0 = x1
+      iteracion +=1
+  convergencia = False
+  return x1, iteracion, convergencia
+```
+
+Aproximamos la raíz de la función con `my_newton` con un valor inicial de $x_0=4$.
+
+```{python}
+#| code-fold: true
+
+raiz, iteraciones, convergencia = my_newton(f, 4, df, tol = 1e-9, it_max= 150)
+print(f"Después de {iteraciones} iteraciones la convergencia es: {convergencia}")
+print("-----------")
+print(f"La aproximación de la raíz es: {raiz}")
+```
 
 También se puede utilizar la función `optimize.newton` de Scipy:
+
+```{python}
+raiz, raiz_info = optimize.newton(f, x0=4, fprime = df, full_output = True)
+
+print("Método de Newton")
+print(raiz_info)
+print("-----------------")
+print(f"La aproximación de la raíz es: {raiz}" )
+```
+
+
+Ahora por el método de la secante:
+
+```{python}
+raiz_secante, raiz_secante_info = optimize.newton(f, x0=1, x1=4 , full_output = True)
+
+print("Método de la secante")
+print(raiz_secante_info)
+print("-----------------")
+print(f"La aproximación de la raíz es: {raiz_secante}" )
+```
