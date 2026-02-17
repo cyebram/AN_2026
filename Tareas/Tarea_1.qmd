@@ -34,6 +34,122 @@ Un polinomio cúbico de la forma $f(x)=ax^3+bx^2+cx+d$ con tres raíces reales d
 
 ::: {#exr-tarea1_3}
 $f(x)= x^3 -5x^2e^{-x}+e^{-3x}$, para $0\leq x \leq 2$
+
+**Gráfica de la función.**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+f = lambda x: x**3-5* x**2 * np.exp(-x)+ np.exp(-3*x)
+
+x = np.linspace(0, 2, 100)
+y = f(x)
+
+# Crear gráfica
+plt.figure(figsize=(8,6)) # Tamaño en pulgadas
+plt.plot(x,y, color ="firebrick") 
+plt.axhline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje x
+plt.axvline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje x
+
+# Personalizar gráfica
+plt.title("Gráfica Ejercicio 3", fontsize= 14)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+
+plt.show()
+```
+
+
+Hay dos raíces ... 
+
+**Aproximación de la primera raíz por el método de la bisección**
+
+```{python}
+#| code-fold: true
+
+raiz_b, raizb_info = optimize.bisect(f, 0, 1, full_output=True)
+
+print("Método de bisección")
+print(raizb_info)
+print("----------------")
+print(f"La primera raíz por el método de la bisección es: {raiz_b}")
+```
+
+**Aproximación de la primera raíz por el método de Newton-Raphson**
+
+La derivada de la función es:
+
+$f'(x) = 3x^2+5xe^{-x}(x-2)-3e^{-3x}$
+
+
+```{python}
+#| code-fold: true
+
+df = lambda x: 3* x**2 + 5*x*np.exp(-x)*(x-2) - 3 * np.exp(-3*x)
+
+raiz_n, raizn_info = optimize.newton(f, x0 = 0, fprime= df, full_output=True)
+
+print("Método de Newton")
+print(raizn_info)
+print("----------------")
+print(f"La primera raíz por el método de Newton es: {raiz_n}")
+```
+
+
+**Aproximación de la primera raíz por el método de la secante**
+
+
+
+```{python}
+#| code-fold: true
+
+raiz_s, raizs_info = optimize.newton(f, x0 = 0, x1=0.5, full_output=True)
+
+print("Método de la secante")
+print(raizs_info)
+print("----------------")
+print(f"La primera raíz por el método de la secante es: {raiz_s}")
+```
+
+**Aproximación de la segunda raíz por el método de la bisección**
+
+```{python}
+#| code-fold: true
+
+raiz2_b, raiz2b_info = optimize.bisect(f, 1, 1.75, full_output=True)
+print("Método de bisección")
+print(raiz2b_info)
+print("----------------")
+print(f"La segunda raíz por el método de la bisección es: {raiz2_b}")
+```
+
+
+**Aproximación de la segunda raíz por el método de Newton-Raphson**
+
+```{python}
+#| code-fold: true
+
+raiz2_n, raiz2n_info = optimize.newton(f, x0 = 2, fprime= df, full_output=True)
+print("Método de Newton")
+print(raiz2n_info)
+print("----------------")
+print(f"La segunda raíz por el método de Newton es: {raiz2_n}")
+```
+
+**Aproximación de la segunda raíz por el método de la secante**
+
+```{python}
+#| code-fold: true
+
+raiz2_s, raiz2s_info = optimize.newton(f, x0 = 1, x1=2, full_output=True)
+print("Método de la secante")
+print(raiz2s_info)
+print("----------------")
+print(f"La segunda raíz por el método de la secante es: {raiz2_s}")
+```
+
 :::
 
 ::: {#exr-tarea1_4}
@@ -46,6 +162,111 @@ $g(x)= e^x-log(x+1) -b$ donde $b=2, 3, 5$.
 
 ::: {#exr-tarea1_6}
 Todas las raíces de $f(x)= \sqrt{x}-sen(x) -c$ para $c=1,\pi$.
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+f = lambda x,c: np.sqrt(x) - np.sin(x) - c
+
+x = np.linspace(0, 40, 500)
+y1 = f(x, c=1)
+y2 = f(x, c=np.pi)
+
+# Crear gráfica
+plt.figure(figsize=(8,6)) # Tamaño en pulgadas
+plt.plot(x,y1, color ="firebrick", label = "c=1")
+plt.plot(x,y2, color ="steelblue", label = "c=pi")
+plt.axhline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje x
+plt.axvline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje y
+plt.legend(fontsize = 14)
+
+# Personalizar gráfica
+plt.title("Gráfica Ejercicio 6", fontsize= 14)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+plt.show()
+```
+
+
+**Aproximación de la raíz para c=1 por el método de la bisección**
+
+```{python}
+#| code-fold: true
+
+raiz_b, raizb_info = optimize.bisect(f, 0, 5, args=(1,), full_output=True)
+
+print("Método de bisección")
+print(raizb_info)
+print("----------------")
+print(f"La raíz para c=1 por el método de la bisección es: {raiz_b}")
+```
+
+**Aproximación de la raíz para c=1 por el método de Newton-Raphson**
+
+La derivada de la función es: $f'(x) = \frac{1}{2\sqrt{x}} - cos(x)$
+
+```{python}
+#| code-fold: true
+
+df = lambda x,c: 1/(2*np.sqrt(x)) - np.cos(x)
+raiz_n, raizn_info = optimize.newton(f, x0 = 4, fprime= df, args=(1,), full_output=True)
+print("Método de Newton")
+print(raizn_info)
+print("----------------")
+print(f"La raíz para c=1 por el método de Newton es: {raiz_n}")
+```
+
+**Aproximación de la raíz para c=1 por el método de la secante**
+
+```{python}
+#| code-fold: true
+
+raiz_s, raizs_info = optimize.newton(f, x0 = 1, x1=4, args=(1,), full_output=True)
+print("Método de la secante")
+print(raizs_info)
+print("----------------")
+print(f"La raíz para c=1 por el método de la secante es: {raiz_s}")
+```
+
+**Raíces para $c=\pi$**
+
+::: {.panel-tabset}
+## 1era raíz
+
+```{python}
+#| code-fold: true
+
+rb, rinfob = optimize.bisect(f, 2, 5, args=(np.pi,), full_output=True)
+rn, rinfon = optimize.newton(f, x0 = 3, fprime= df, args=(np.pi,), full_output=True)
+rs, rinfos = optimize.newton(f, x0 = 2, x1=4, args=(np.pi,), full_output=True)
+
+print(f"Raíz para c=pi por el método de la bisección: {rb}")
+print(f"Raíz para c=pi por el método de Newton: {rn}")
+print(f"Raíz para c=pi por el método de la secante: {rs}")
+
+```
+
+## 2da raíz
+
+```{python}
+#| code-fold: true
+
+rb, rinfob = optimize.bisect(f, 5, 7, args=(np.pi,), full_output=True)
+rn, rinfon = optimize.newton(f, x0 = 6, fprime= df, args=(np.pi,), full_output=True)
+rs, rinfos = optimize.newton(f, x0 = 5, x1=7, args=(np.pi,), full_output=True)
+
+print(f"Raíz para c=pi por el método de la bisección: {rb}")
+print(f"Raíz para c=pi por el método de Newton: {rn}")
+print(f"Raíz para c=pi por el método de la secante: {rs}")
+```
+
+
+:::
+
+
+
 :::
 
 ::: {#exr-tarea1_7}
@@ -57,6 +278,105 @@ x^2 +3y^2 - 4 &=& 0\\
 \end{eqnarray}
 
 tiene dos soluciones. Realiza una gráfica de las curvas de nivel y aproxima las soluciones.
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+#| warning: false
+
+f1 = lambda x: np.sqrt(x**2 - 4 *x +2)
+f2 = lambda x: -np.sqrt(x**2 - 4 *x +2)
+
+g1 = lambda x: np.sqrt((1/3)* (-x** 2 +4))
+g2 = lambda x: -np.sqrt((1/3)* (-x** 2 +4))
+
+x = np.linspace(-2, 2,500)
+
+# Crear gráfica
+plt.figure(figsize=(8,6)) # Tamaño en pulgadas
+plt.plot(x,f1(x), color ="#115dc1", label = "f1(x)")
+plt.plot(x,f2(x), color ="#235d1c", label = "f2(x)")
+plt.plot(x, g1(x), color = "#c8955a", label = "g1(x)")
+plt.plot(x, g2(x), color = "#e54c19", label = "g2(x)")
+plt.axhline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje x
+plt.axvline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje y
+plt.legend(fontsize= 14)
+
+# Personalizar gráfica
+plt.title("Gráfica Ejercicio 7", fontsize= 12)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+
+plt.show()
+
+```
+
+Encontramos los valores de $x$ igualando para $y^2$ ...
+
+```{python}
+#| code-fold: true
+#| warning: false
+
+f = lambda x : (4/3)* x**2 - 4 *x +2/3
+
+# Crear gráfica
+plt.figure(figsize=(8,6)) # Tamaño en pulgadas
+plt.plot(x,f(x), color ="#115dc1", label = "f(x)")
+plt.axhline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje x
+plt.axvline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje y
+plt.legend(fontsize= 14)
+
+# Personalizar gráfica
+plt.title("Gráfica Ejercicio 7.b", fontsize= 12)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+
+plt.show()
+
+```
+
+```{python}
+#| code-fold: true
+#| warning: false
+
+df = lambda x: (8/3)*x-4
+
+x_root = optimize.newton(f, x0=1, fprime=df)
+y1_root = f1(x_root)
+y2_root = f2(x_root)
+
+print(f"Los puntos de intersección son ({x_root},{y1_root})y ({x_root}, {y2_root})")
+
+```
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+#| warning: false
+
+# Crear gráfica
+plt.figure(figsize=(8,6)) # Tamaño en pulgadas
+plt.plot(x,f1(x), color ="#115dc1", label = "f1(x)")
+plt.plot(x,f2(x), color ="#235d1c", label = "f2(x)")
+plt.plot(x, g1(x), color = "#c8955a", label = "g1(x)")
+plt.plot(x, g2(x), color = "#e54c19", label = "g2(x)")
+plt.plot(x_root, y1_root, marker = 'o', ms = 8, color = "firebrick")
+plt.plot(x_root, y2_root, marker = 'o', ms = 8, color = "firebrick")
+plt.axhline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje x
+plt.axvline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje y
+plt.legend(fontsize= 14)
+
+# Personalizar gráfica
+plt.title("Gráfica Ejercicio 7", fontsize= 12)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+
+plt.show()
+```
 
 
 :::
@@ -70,6 +390,69 @@ x + cos(y) - 1 &=& 0\\
 \end{eqnarray}
 
 Realiza una gráfica de las curvas de nivel y aproxima la solución con la función `fsolve`.
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+f1 = lambda x: np.sqrt(1- np.sin(x))
+f2 = lambda x: -f1(x)
+g = lambda x: np.acos(1-x)
+
+x = np.linspace(0,2, 500)
+
+# Crear gráfica
+plt.figure(figsize=(8,6)) # Tamaño en pulgadas
+plt.plot(x,f1(x), color ="#115dc1", label = "f1(x)")
+plt.plot(x,f2(x), color ="#235d1c", label = "f2(x)")
+plt.plot(x, g(x), color = "#c8955a", label = "g(x)")
+plt.axhline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje x
+plt.axvline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje y
+plt.legend(fontsize= 14)
+
+# Personalizar gráfica
+plt.title("Gráfica Ejercicio 8", fontsize= 12)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+
+plt.show()
+```
+
+Aproximamos la única intersección
+
+```{python}
+#| code-fold: true
+
+def sistema(variables):
+  x,y = variables
+  return [np.sin(x) + y**2-1, x+ np.cos(y)-1]
+
+solucion = optimize.fsolve(sistema, x0=[0.25,1])  
+print(f"El punto de intersección es:{solucion}")
+
+# Crear gráfica
+plt.figure(figsize=(8,6)) # Tamaño en pulgadas
+plt.plot(x,f1(x), color ="#115dc1", label = "f1(x)")
+plt.plot(x,f2(x), color ="#235d1c", label = "f2(x)")
+plt.plot(x, g(x), color = "#c8955a", label = "g(x)")
+plt.plot(solucion[0], solucion[1], marker = "o", ms = 8, color = "firebrick")
+plt.axhline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje x
+plt.axvline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje y
+plt.legend(fontsize= 14)
+
+# Personalizar gráfica
+plt.title("Gráfica Ejercicio 8", fontsize= 12)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+
+plt.show()
+
+
+```
+
+
 :::
 
 ::: {#exr-tarea1_9}
