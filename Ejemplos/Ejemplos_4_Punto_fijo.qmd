@@ -1,0 +1,163 @@
+---
+title: "Ejemplos 4. Punto fijo"
+lang: es
+format: 
+  html:
+    grid:
+      body-width: 1200px
+---
+
+```{python}
+#| code-fold: true
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import optimize
+```
+
+
+Inicialmente definimos la función de punto fijo.
+
+```{python}
+def punto_fijo(g, p0, tol= 1e-5, itmax=500):
+    for i in range(itmax):
+        p_new = g(p0)
+        if np.abs(p_new-p0) < tol:
+            return p_new, i+1
+        p0 = p_new
+    raise RuntimeError(f"No se encontró un punto fijo en {itmax} iteraciones.")
+
+```
+
+
+::: {#exm-pf3}
+
+La función $f(x)=x^3+4x^2-10$ tiene una raíz en el intervalo $[1,2]$. Reformular el problema de encontrar la raíz de $f$ como un problema de encontrar un punto fijo de una función relacionada. Utilizar el algoritmo de iteración de punto fijo para aproximar la raíz de $f$ con una tolerancia de $10^{-7}$.
+
+Inicialmente se muestra la gráfica de la función $f$ y se indica la respectiva raíz en el intervalo $[1,2]$.
+
+```{python}
+#| code-fold: true
+#| fig-align: 'center'
+
+f = lambda x: x**3 + 4*x**2 - 10
+f_root = optimize.newton(f, 1.5)
+
+x = np.linspace(1, 1.8, 200)
+plt.figure(figsize=(6,4.5))
+plt.plot(x, f(x), color = "darkred", label = "f(x)")  
+plt.plot(f_root, 0, marker = 'o', ms=8, color= "#1c29df", label = "Raíz de f")
+plt.axhline(0, color = "black", linewidth = 0.8, linestyle = "--") #Eje x
+# Personalizar gráfica
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+plt.legend()
+plt.show()
+
+```
+
+
+
+Para reformular el problema de encontrar la raíz de $f$ como un problema de encontrar un punto fijo, definimos las funciones:
+
+a) $x=g_1(x)=\frac{1}{2}\sqrt{10-x^3}$
+
+b) $x=g_2(x)=\sqrt{\frac{10}{x+4}}$
+
+c) $x=g_3(x)=x -\frac{x^3+4x^2-10}{3x^2+8x}$
+
+A continuación se muestra la gráfica de las funciones $g_1$, $g_2$ y $g_3$ junto con la función identidad $y=x$ y el respectivo punto fijo de cada función.
+
+
+```{python}
+#| code-fold: true
+#| fig-align: 'center'
+
+g1 = lambda x: 0.5 * np.sqrt(10 - x**3)
+g2 = lambda x: np.sqrt(10/(x+4))  
+g3 = lambda x: x - (x**3 + 4*x**2 - 10)/(3*x**2 + 8*x)
+
+x = np.linspace(1, 1.8, 200)
+plt.figure(figsize=(6,4.5))
+plt.plot(x, g1(x), color = "steelblue", label = "g1(x)")
+plt.plot(x, g2(x), color = "darkgreen", label = "g2(x)")
+plt.plot(x, g3(x), color = "darkorange", label = "g3(x)")
+plt.plot(x, x, color = "black", label = "y=x")
+plt.plot(f_root, f_root, marker = 'o', ms=8, color= "black", label = "Punto fijo")
+# Personalizar gráfica
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+plt.axis('equal')  # Escala igual en ambos ejes
+plt.legend()
+plt.show()
+
+```
+
+
+
+:::
+
+
+::: {#exm-pf4}
+
+## Equilibrio de mercado con ajuste de precios
+
+Consideremos un mercado donde la cantidad demandada y ofertada de un bien dependen del precio $p$ de dicho bien. En el periodo $t$, el precio del bien se ajusta en función del exceso de demanda según la siguiente ecuación:
+
+\begin{equation}
+p_{t+1}=p_t + \alpha (D(p_t)-S(p_t)),
+\end{equation}
+
+donde $D$ es la función de demanda, $S$ es la función de oferta y $\alpha >0$ es un parámetro que mide la velocidad de ajuste del precio. Un precio de equilibrio $p^*$ es aquel donde este proceso se estabiliza, es decir, $p^*=g(p^*)$ con
+\begin{equation}
+g(p)=p + \alpha (D(p)-S(p)).
+\end{equation}
+
+Consideremos un mercado donde la demanda depende del precio y también del nivel agregado de consumo (efecto red), y la oferta responde con un componente no lineal de costos crecientes:
+
+\begin{equation}
+D(p)= 8- \log(1+p),\qquad S(p)=2 + \sqrt{p}.
+\end{equation}
+
+Tomando $\alpha = 0.3$, se puede aproximar el precio de equilibrio utilizando el algoritmo de iteración de punto fijo, para esto se define la función $g$ como
+
+\begin{equation}
+g(p)=p + 0.3 (D(p)-S(p))=p + 0.3 (8- \log(1+p) - 2 - \sqrt{p})=p + 0.3 (6- \log(1+p) - \sqrt{p}).
+\end{equation}
+
+Verificar las condiciones del teorema del punto fijo para la función $g$ en el intervalo $[8, 14]$ y aproximar el precio de equilibrio con una tolerancia de $10^{-7}$.
+
+Inicialmente se muestra la gráfica de las funciones $D$ y $S$ para visualizar el equilibrio del mercado.
+
+```{python}
+#| code-fold: true
+#| fig-align: 'center'
+
+D = lambda p: 8 - np.log(1+p)
+S = lambda p: 2 + np.sqrt(p)
+alpha = 0.3
+g = lambda p: p + alpha * (D(p) - S(p))
+
+
+x = np.linspace(8, 14, 200)
+plt.figure(figsize=(6,4.5))
+plt.plot(x, D(x), color = "darkred", label = "D(p)")
+plt.plot(x, S(x), color = "steelblue", label = "S(p)")
+# Personalizar gráfica
+plt.xlabel("p")
+plt.ylabel("Unidades")
+plt.grid()
+plt.axis('equal')  # Escala igual en ambos ejes
+plt.legend()
+plt.show()
+```
+
+
+
+
+
+
+:::
+
