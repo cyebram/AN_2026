@@ -1,0 +1,162 @@
+---
+title: "Tarea 2. Punto fijo y series de Taylor"
+author: "Mi nombre"
+lang: es
+format: 
+  html:
+    grid:
+      body-width: 1200px
+---
+
+```{python}
+#| code-fold: true
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import optimize
+from math import factorial
+```
+
+::: {#exr-tarea2_1}
+
+Sea $f(x)=x^4+2x^2-x-3$, demostrar que cada cada una de las siguientes funciones tiene un punto fijo en $p$, precisamente donde $f(p)=0$. Esta función tiene dos raíces reales en el intervalo $[-2,2]$, encuentra estas raíces usando el método de punto fijo con cada una de las funciones proporcionadas (en algunos casos será necesario la raíz negativa) y brindando un intervalo de convergencia para cada una de ellas. En cada caso, grafica la función $g_i(x)$ y el eje $y=x$ para visualizar los puntos fijos.
+
+**(a)** $g_1(x) = \sqrt[4]{3+x-2x^2}$
+
+**(b)** $g_2(x) = \sqrt{\frac{3 + x - x^4}{2}}$
+
+**(c)** $g_3(x) = \sqrt{\frac{x+3}{x^2+2}}$
+
+**(d)** $g_4(x) = \frac{3x^4+2x^2+3}{4x^3+4x-1}$
+
+:::
+
+::: {#exr-tarea2_2}
+
+Usa el método de iteración de punto fijo para determinar las raíces reales de la función $f(x)=x^4-3x^2-3$ usando las funciones apropiadamente transformadas. Grafica cada función de iteración junto con el eje $y=x$ para visualizar los puntos fijos y determinar un intervalo de convergencia para cada una de ellas.
+
+:::
+
+
+::: {#exr-tarea2_3}
+
+Encuentra todas las raíces de la función $f(x)= x^2+10\,cos(x)$ usando el método de punto fijo. Para esto, transforma la función de manera adecuada para obtener funciones de iteración que permitan encontrar las raíces. Grafica cada función de iteración junto con el eje $y=x$ para visualizar los puntos fijos y determinar un intervalo de convergencia para cada una de ellas.
+
+:::
+
+
+::: {#exr-tarea2_4}
+
+Un mercado presenta las funciones de demanda y oferta:
+
+\begin{equation}
+D(p) = 15e^{-0.4p}, \qquad S(p) = 2p^{1.2} - 1,
+\end{equation}
+
+con mecanismo de ajuste de precios $\alpha = 0.25$:
+
+\begin{equation}
+g(p) = p + 0.25(D(p) - S(p)) = p + 0.25(15e^{-0.4p} - 2p^{1.2} + 1).
+\end{equation}
+
+**(a)** Demostrar que existe un intervalo $[a, b]$ apropiado donde se cumplen las condiciones del teorema de existencia y unicidad del punto fijo. Justificar la elección de $a$ y $b$ verificando que $g([a,b]) \subseteq [a,b]$.
+
+**(b)** Analizar la condición $|g'(p)| \leq k < 1$ en dicho intervalo. Determinar explícitamente una constante de contracción $k$.
+
+**(c)** Aplicar la iteración de punto fijo con hasta alcanzar una tolerancia de $10^{-6}$, reportando la tabla de iteraciones y la cota de error a posteriori en cada paso.
+
+**(d)** Interpretar económicamente el precio de equilibrio $p^*$ obtenido: ¿qué implica sobre las cantidades de equilibrio $D(p^*)$ y $S(p^*)$?
+
+:::
+
+
+::: {#exr-tarea2_5}
+
+Un mercado con retornos decrecientes a escala en la producción presenta:
+
+\begin{equation}
+D(p) = \frac{18}{(1+p)^{0.8}}, \qquad S(p) = 3 + 2\ln(p),
+\end{equation}
+
+con $\alpha = 0.2$:
+
+\begin{equation}
+g(p) = p + 0.2\left(\frac{18}{(1+p)^{0.8}} - 3 - 2\ln(p)\right).
+\end{equation}
+
+**(a)** Determinar un intervalo $[a, b]$ con $a > 0$ donde se satisfagan las hipótesis del teorema de existencia y unicidad del punto fijo. La elección de $a$ debe ser cuidadosa pues $\ln(p) \to -\infty$ cuando $p \to 0^+$, y la derivada presenta problemas cerca del origen.
+
+**(b)** Determinar una constante de contracción $k$ explícita para el intervalo elegido y estimar cuántas iteraciones son necesarias para garantizar un error menor que $10^{-5}$ usando la **cota a priori**, tomando $p_0 = 4$.
+
+**(c)** Implementar la iteración con $p_0 = 4$ hasta alcanzar la tolerancia de $10^{-5}$, reportando la tabla de iteraciones y la cota de error a posteriori en cada paso.
+
+**(d)** Investigar qué ocurre si se toma $\alpha = 0.6$. ¿Converge el método? Relacionar la respuesta con el valor de $g'(p)$ en el intervalo y desarrollar la interpretación económica.
+
+:::
+
+
+::: {#exr-tarea2_6}
+
+Sea $f(x) = e^x\,cos(x)$ y $x_0=0$.
+
+**(a)** Calcular y graficar los polinomios de Taylor hasta orden $n=5$ de $f$ alrededor de $x_0$.
+
+**(b)** Usar $P_5(0.5)$ para aproximar $f(0.5)$.
+
+**(c)** Encontrar una cota superior para el error $|f(0.5) - P_5(0.5)|$ usando el término de orden 6 de la serie de Taylor y comparar esta cota con el error real.
+
+:::
+
+::: {#exr-tarea2_7}
+
+Consideremos la función $f(x) = x e^{x^2}$ y $x_0=0$.
+
+**(a)** Calcular y graficar los polinomios de Taylor hasta orden $n=8$ de $f$ alrededor de $x_0$.
+
+**(b)** Usar $P_8(0.2)$ para aproximar $f(0.2)$.
+
+**(c)** Encontrar una cota superior para el error $|f(0.2) - P_8(0.2)|$ usando el término de orden 9 de la serie de Taylor y comparar esta cota con el error real.
+
+:::
+
+::: {#exr-tarea2_8}
+
+En Microeconomía, la función de utilidad con **aversión relativa al riesgo constante** tiene la forma:
+
+\begin{equation}
+f(x) = \frac{x^{1-\gamma} - 1}{1 - \gamma}, \qquad \gamma > 0,\ \gamma \neq 1, \quad x > 0.
+\end{equation}
+
+Consideremos $\gamma = 0.5$ y se aproxima alrededor de $x_0 = 1$.
+
+**(a)** Calcular y graficar los polinomios de Taylor hasta orden $n = 5$ de $f(x)$ alrededor de $x_0 = 1$. Mostrar explícitamente el cálculo de cada derivada $f^{(k)}(1)$ para $k = 0, 1, 2, 3, 4, 5$.
+
+
+**(b)** Usando el término de orden 6 del resto de Taylor, acotar el error $|f(x) - P_5(x)|$ en el intervalo $[0.5, 1.5]$. Determinar una cota $M$ tal que $|f^{(6)}(\xi)| \leq M$ para todo $\xi \in [0.5, 1.5]$, teniendo en cuenta que $f^{(6)}(x)$ se hace grande cuando $x \to 0^+$. 
+
+**(c)** Graficar el error máximo en escala logarítmica como función del grado $n$ para $n = 1, 2, \ldots, 5$.
+
+:::
+
+
+::: {#exr-tarea2_9}
+
+La **tasa de interés efectiva anual** equivalente a una tasa nominal $r$ capitalizada $m$ veces por año es:
+
+\begin{equation}
+f(r) = \left(1 + \frac{r}{m}\right)^m - 1.
+\end{equation}
+
+Consideremos $m = 12$ (capitalización mensual) y se aproxima alrededor de $r_0 = 0$.
+
+**(a)** Calcular los polinomios de Taylor hasta orden $n = 5$ de $f(r)$ alrededor de $r_0 = 0$.
+
+**(b)** Analizar el comportamiento del polinomio cuando $m \to \infty$. ¿A qué función conocida converge $f(r)$ en ese límite? ¿Cómo se refleja esto en los coeficientes del polinomio de Taylor?
+
+**(c)** Determinar el intervalo $[0, r^*]$ donde $|f(r) - P_5(r)| < 10^{-5}$.
+Usar la cota del resto y verificar graficando el error.
+
+**(d)** Implementar una función `taylor_tasa(r, m, n)` que calcule el polinomio de Taylor de grado $n$ para cualquier $m$. Comparar las aproximaciones para $m = 1, 2, 4, 12, 365$ en $r \in [0, 0.2]$ y discutir cuál requiere mayor grado $n$ para alcanzar la misma precisión.
+
+
+:::
