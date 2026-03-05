@@ -1,0 +1,87 @@
+---
+title: "Ejemplos 6. Polinomios de Interpolación de Lagrange"
+lang: es
+format:
+  html:
+    grid:
+      body-width: 1200px 
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+from math import factorial
+from scipy.interpolate import lagrange
+from numpy.polynomial import Polynomial
+from scipy.stats import norm
+```
+
+
+
+::: {#exm-lagrange_1}
+Determinar el polinomio de interpolación de Lagrange para los puntos $(2,4)$ y $(5,3)$.
+
+:::
+
+::: {#exm-lagrange_2}
+
+Sea $f(x)= log(x)$, determinar el polinomio de interpolación de Lagrange para los nodos $x_0=1$ y $x_1=2$.
+
+:::
+
+
+::: {#exm-lagrange_3}
+Consideremos los siguientes puntos en $\mathbb{R}^2$:
+
+\begin{equation}
+\begin{array}{l|c|c|c|c|} 
+\text{x} & 0 & 1 & 2 & 3 \\
+\hline \text{y} & 1 & -4 & -7 & -2  
+\end{array}
+\end{equation}
+
+Encontrar y graficar los polinomios base para el polinomio de Lagrange que contiene a los puntos, posteriormente, graficar el polinomio de interpolación de Lagrange.
+
+:::
+
+
+
+
+::: {#exm-lagrange_4}
+
+Consideremos la función $f(x)=e^{-x}sen(2\pi x)$, y el intervalo $[0, 2]$. Graficar los polinomios de la base de Lagrange para $n+1=7$ nodos equiespaciados, posteriormente, graficar el polinomio de interpolación de Lagrange.
+
+A continuación se definen las funciones para calcular los polinomios base y el polinomio interpolante de Lagrange.
+
+```{python}
+# Evaluación de los polinomios base L_{n,k}(x)
+def lagrange_base(x, k, nodos):
+    n = len(nodos)
+    result = np.ones(len(x))
+    for j in range(n):
+        if j != k:
+            result *= (x - nodos[j]) / (nodos[k] - nodos[j])
+    return result
+
+# Polinomio interpolante 
+def lagrange_interpolante(x, nodos, values):
+    n = len(nodos)
+    result = np.zeros(len(x))
+    for k in range(n):
+        result += values[k] * lagrange_base(x, k, nodos)
+    return result
+
+```
+
+Usando la función `lagrange` de `scipy.interpolate`, encontrar el polinomio de interpolación de Lagrange para los mismos nodos y valores, posteriormente, graficar el resultado.
+
+:::
+
+
+
+::: {#exm-lagrange_5}
+
+Brindar los polinomios de interpolación de Lagrange para la función de densidad de probabilidad de una variable aleatoria con distribución normal con media cero y desviación estándar dos, con $n+1$ nodos equiespaciados en el intervalo $[-6, 6]$ para $n=2, 4, 6, 8$.
+
+:::
