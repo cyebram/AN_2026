@@ -1,0 +1,293 @@
+---
+title: "Ejemplos 7. Interpolación con Splines Cúbicos"
+lang: es
+format:
+  html:
+    grid:
+      body-width: 1200px 
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+from math import factorial
+from scipy.interpolate import CubicSpline
+from scipy.interpolate import lagrange
+from numpy.polynomial import Polynomial
+from scipy.stats import norm
+import yfinance as yf
+import pandas as pd
+```
+
+
+
+::: {#exm-spline_1}
+Consideremos los siguientes puntos en $\mathbb{R}^2$:
+
+\begin{equation}
+\begin{array}{l|c|c|c|c|} 
+\text{x} & 0 & 1 & 2 & 3 \\
+\hline \text{y} & 1 & -4 & -7 & -2  
+\end{array}
+\end{equation}
+
+Encontrar y graficar la interpolación con splines cúbicos de estos puntos, con condiciones de frontera naturales. Comparar con la interpolación polinómica de Lagrange.
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+x = np.array([0, 1, 2, 3])
+y = np.array([1, -4, -7, -2])
+
+# Interpolación con Splines Cúbicos
+cs = CubicSpline(x, y, bc_type='natural')
+x_spline = np.linspace(x[0], x[-1], 100)
+y_spline = cs(x_spline)
+
+# Interpolación con Lagrange
+lagrange_poly = lagrange(x, y)
+y_lagrange = lagrange_poly(x_spline)  
+
+plt.figure(figsize=(8, 5))
+plt.plot(x_spline, y_spline, color = "#FF5733", label = "Spline Cúbico")
+plt.plot(x_spline, y_lagrange, color = "#36d6a6", label = "Polinomio de Lagrange")
+plt.scatter(x, y, color = "#b9ca1a", label = "Puntos de Interpolación", zorder = 5, s = 80)
+#Anotaciones
+for xi, yi in zip(x, y):
+    plt.annotate(f"({xi}, {yi})", (xi, yi), textcoords="offset points", xytext=(10,10), ha='center', fontsize=9)  
+plt.axhline(0, color='black', linewidth=0.8, linestyle='--')
+plt.title("Interpolación con Splines Cúbicos vs Lagrange")
+plt.xlabel("x")
+plt.ylabel("y")
+plt.legend()
+plt.grid(alpha = 0.3)
+plt.show()
+```
+
+A continuación se muestran los coeficientes de los polinomios de cada intervalo para el spline cúbico:
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+print("Coeficientes de los polinomios de cada intervalo para el spline cúbico:")
+for i in range(len(x)-1):
+    print(f"Intervalo [{x[i]}, {x[i+1]}]: a = {cs.c[3][i]}, b = {cs.c[2][i]}, c = {cs.c[1][i]}, d = {cs.c[0][i]}")
+```
+
+
+
+
+:::
+
+
+::: {#exm-spline_2}
+
+Consideremos la función $f(x)=e^{-x}sen(2\pi x)$, y el intervalo $[0, 2]$. Encontrar y graficar la interpolación con splines cúbicos de esta función, utilizando 9 nodos equidistantes. Comparar con la interpolación polinómica de Lagrange.
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+x = np.linspace(0, 2, 9)  # 9 nodos equidistantes
+y = np.exp(-x) * np.sin(2 * np.pi * x)
+
+# Interpolación con Splines Cúbicos
+cs = CubicSpline(x, y, bc_type='natural')
+x_spline = np.linspace(x[0], x[-1], 100)
+y_spline = cs(x_spline)
+# Interpolación con Lagrange
+lagrange_poly = lagrange(x, y)
+y_lagrange = lagrange_poly(x_spline)
+
+plt.figure(figsize=(8, 5))
+plt.plot(x_spline, y_spline, color = "#FF5733", label = "Spline Cúbico")
+plt.plot(x_spline, y_lagrange, color = "#36d6a6", label = "Polinomio de Lagrange")
+plt.plot(x_spline, np.exp(-x_spline) * np.sin(2 * np.pi * x_spline), color = "#2e86c1", label = "Función Original") 
+plt.scatter(x, y, color = "#b9ca1a", label = "Puntos de Interpolación", zorder = 5, s = 80)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("Interpolación con Splines Cúbicos vs Lagrange")
+plt.legend()
+plt.grid(alpha = 0.3)
+plt.show()
+
+```
+
+A continuación se muestran los coeficientes de los polinomios de cada intervalo para el spline cúbico:
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+print("Coeficientes de los polinomios de cada intervalo para el spline cúbico:")
+for i in range(len(x)-1):
+    print(f"Intervalo [{x[i]}, {x[i+1]}]: a = {cs.c[3][i]}, b = {cs.c[2][i]}, c = {cs.c[1][i]}, d = {cs.c[0][i]}")
+``` 
+
+
+Dado que en este caso se brinda la función, es posible encontrar la derivada de la función y utilizarla para establecer condiciones de frontera tipo *clamped* para el spline cúbico, lo que puede mejorar la precisión de la interpolación. La derivada de la función es:
+
+\begin{equation}
+f'(x) = -e^{-x} \sin(2\pi x) + 2\pi e^{-x} \cos(2\pi x)
+\end{equation}
+
+A continuación se muestra la interpolación con splines cúbicos utilizando estas condiciones de frontera:
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+# Derivada de la función en los extremos
+f_prime = lambda x: -np.exp(-x) * np.sin(2 * np.pi * x) + 2 * np.pi * np.exp(-x) * np.cos(2 * np.pi * x)
+bc_type = ((1, f_prime(x[0])), (1, f_prime(x[-1]))) 
+cs_clamped = CubicSpline(x, y, bc_type=bc_type)
+y_spline_clamped = cs_clamped(x_spline)
+plt.figure(figsize=(8, 5))
+plt.plot(x_spline, y_spline_clamped, color = "#FF5733", label = "Spline Cúbico (Clamped)")
+plt.plot(x_spline, np.exp(-x_spline) * np.sin(2 * np.pi * x_spline), color = "#2e86c1", label = "Función Original") 
+plt.scatter(x, y, color = "#b9ca1a", label = "Puntos de Interpolación", zorder = 5, s = 80)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.legend()
+plt.title("Interpolación con Spline Cúbico (Clamped)")
+plt.grid(alpha = 0.3)
+plt.show()
+
+```
+
+:::
+
+
+
+::: {#exm-spline_3}
+
+Brindar los polinomios de interpolación con splines cúbicos para la función de densidad de probabilidad de una variable aleatoria con distribución normal con media cero y desviación estándar dos, con $n+1$ nodos equiespaciados en el intervalo $[-6, 6]$ para $n=3, 5, 7$.
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+f = lambda x: norm.pdf(x, loc=0, scale=2)
+n_values = [3, 5, 7, 9]
+x = np.linspace(-6.5, 6.5, 200)
+plt.figure(figsize=(8, 5))
+for n in n_values:
+    nodos = np.linspace(-6, 6, n + 1)
+    values = f(nodos)
+    cs = CubicSpline(nodos, values, bc_type='natural')
+    plt.plot(x, cs(x), label = f"$S_{{{n}}}(x)$")
+plt.plot(x, f(x), color = "#2e86c1", label = "$f(x)$", linewidth = 3)
+plt.scatter(nodos, values, color = "#353a0d", zorder = 5, s = 80, label = "Puntos de Interpolación")
+plt.grid(alpha = 0.3)
+plt.legend()
+plt.show()
+```
+
+:::
+
+
+::: {#exm-spline_4}
+
+Consideremos la función
+
+\begin{equation}
+f(x) = \frac{1}{1 + 25x^2}\quad x\in [-1, 1]
+\end{equation}
+
+Brindar los polinomios de interpolación con splines cúbicos para esta función con 11 nodos equiespaciados en el intervalo $[-1, 1]$. Comparar con la interpolación polinómica de Lagrange utilizando los mismos nodos.
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+f = lambda x: 1 / (1 + 25 * x**2)
+n = 10
+x = np.linspace(-1, 1, n + 1)
+y = f(x)
+# Interpolación con Splines Cúbicos
+cs = CubicSpline(x, y, bc_type='natural')
+x_spline = np.linspace(x[0], x[-1], 100)
+y_spline = cs(x_spline)
+# Interpolación con Lagrange
+lagrange_poly = lagrange(x, y)
+y_lagrange = lagrange_poly(x_spline)
+plt.figure(figsize=(8, 5))
+plt.plot(x_spline, y_spline, color = "#FF5733", label = "Spline Cúbico")
+plt.plot(x_spline, y_lagrange, color = "#36d6a6", label = "Polinomio de Lagrange")
+plt.plot(x_spline, f(x_spline), color = "#2e86c1", label = "Función Original") 
+plt.scatter(x, y, color = "#b9ca1a", label = "Puntos de Interpolación", zorder = 5, s = 80)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("Interpolación con Splines Cúbicos vs Lagrange")
+plt.legend()
+plt.grid(alpha = 0.3)
+plt.show()
+```
+
+
+Este ejemplo es *típico* para mostrar la ventaja de los splines cúbicos sobre la interpolación polinómica de Lagrange, ya que esta última puede presentar oscilaciones significativas (fenómeno de Runge) al aumentar el número de nodos, mientras que los splines cúbicos mantienen una buena aproximación a la función original sin oscilaciones indeseadas.
+
+:::
+
+
+::: {#exm-spline_5}
+
+Yahoo Finance es una plataforma que proporciona datos financieros, incluyendo precios históricos de acciones. Utilizando la biblioteca `yfinance`, descargar los precios de cierre mensuales de la acción de NVIDIA (NVDA) para el año 2025, y luego encontrar y graficar la interpolación con splines cúbicos de estos datos.
+
+
+Inicialmente mostramos la gráfica con frecuencia de un día para observar la tendencia general de los precios a lo largo del año.
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+df_2025 = yf.download("NVDA", start="2025-01-01", end="2025-12-31", interval="1d")
+plt.figure(figsize=(10, 5))
+plt.plot(df_2025.index, df_2025['Close'], label='Precio de cierre')
+plt.title('Precio de cierre de NVDA (Frecuencia diaria)')
+plt.xlabel('Fecha')
+plt.ylabel('Precio (USD)')
+plt.legend()
+plt.grid()
+plt.show()
+
+
+```
+
+
+Ahora descargamos los precios de cierre mensuales y realizamos la interpolación con splines cúbicos:
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+df_2025 = yf.download("NVDA", start="2025-01-01", end="2025-12-31", interval="1mo")
+df_2025["x_value"] = np.arange(len(df_2025), dtype=float)
+x = np.asarray(df_2025['x_value'], dtype=float)
+y = np.asarray(df_2025['Close'].squeeze(), dtype=float)
+polinomio = CubicSpline(x, y, bc_type='natural')
+
+dates_new = pd.date_range(start=df_2025.index.min(), end=df_2025.index.max(), freq='D')
+x_plot = np.linspace(x.min(), x.max(), len(dates_new))
+plt.figure(figsize=(10, 5))
+plt.plot(df_2025.index, df_2025['Close'], label='Precio de cierre')
+plt.plot(dates_new, polinomio(x_plot), label='Spline Cúbico', color='orange')
+plt.scatter(df_2025.index, df_2025['Close'], color='red', zorder=5)
+plt.title('Precio de cierre de NVDA con Spline Cúbico')
+plt.xlabel('Fecha')
+plt.ylabel('Precio (USD)')
+plt.legend()
+plt.grid()
+plt.show()
+```
+
+:::
+
+
+
