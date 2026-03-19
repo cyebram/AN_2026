@@ -1,0 +1,637 @@
+---
+title: "Ejemplos 8. Gráficas de Series Temporales"
+lang: es
+format:
+  html:
+    grid:
+      body-width: 1200px 
+---
+
+Instalar las bibliotecas: `openpyxl`, `datetime`, `plotly` y `statsmodels`; para manejar archivos Excel, trabajar con fechas, crear gráficos interactivos y realizar análisis de series temporales, respectivamente. Agregar también la extension `Data Wrangler` para facilitar la manipulación de datos en `pandas`.
+
+
+```{python}
+#| echo: false
+
+import numpy as np
+import matplotlib.pyplot as plt
+import yfinance as yf
+import pandas as pd
+
+import matplotlib.ticker as ticker
+import seaborn as sns
+import plotly.express as px
+import plotly.graph_objects as go
+import calendar
+import statsmodels.api as sm
+import statsmodels.graphics.tsaplots as tsaplots
+import statsmodels.tsa.stattools as ts
+import statsmodels.tsa.seasonal as seasonal
+```
+
+
+## Indicadores Económicos del INEGI
+
+En este ejemplo, se muestra cómo cargar y graficar indicadores económicos del INEGI utilizando la biblioteca `pandas` para manejar los datos y `matplotlib` para visualizarlos.   
+
+El objetivo es visualizar la evolución de estos indicadores a lo largo del tiempo, lo que puede ser útil para analizar tendencias, identificar patrones y tomar decisiones informadas basadas en la información económica disponible.
+
+**Cargar datos**
+
+Cargamos el conjunto de datos y mostramos su estructura para entender qué tipo de información contiene y cómo está organizada. Esto nos permitirá seleccionar las columnas relevantes para nuestras gráficas de series temporales.
+
+```{python}
+#| code-fold: true
+
+data_inegi = pd.read_excel("TIE_Inegi_long.xlsx")
+data_inegi.info()
+```
+
+
+
+### Asegurados permanentes en el IMSS
+
+En esta sección, se grafica la serie temporal de los asegurados permanentes en el IMSS para observar su evolución a lo largo del tiempo. Esto puede ayudar a identificar tendencias, patrones estacionales o cambios significativos en el número de asegurados, lo que es relevante para el análisis del mercado laboral y la economía en general.
+
+
+```{python}
+#| code-fold: true
+df_imss = data_inegi[["Fecha", "Asegurados_IMSS"]].dropna()
+df_imss.info()
+print(f"Fecha de inicio: {df_imss['Fecha'].min()}")
+print(f"Fecha de fin: {df_imss['Fecha'].max()}")
+print("------")
+
+print("Estadísticas descriptivas de IMSS:")
+print(df_imss["Asegurados_IMSS"].describe())
+```
+
+
+
+**Serie temporal de IMSS**
+
+Una serie temporal es una secuencia de datos recopilados o registrados en intervalos de tiempo sucesivos. En este caso, se grafican los asegurados permanentes en el IMSS a lo largo del tiempo para visualizar su evolución y detectar posibles tendencias o patrones en el mercado laboral.
+
+
+```{python}
+#| code-fold: true
+
+# Configurar la columna "Fecha" como índice para facilitar la manipulación de datos y la creación de gráficos de series temporales.
+df_imss.set_index("Fecha", inplace=True)
+# Definición de la serie temporal
+imss_ts = df_imss["Asegurados_IMSS"]
+print(imss_ts.info())
+```
+
+
+**Gráfica de la serie temporal de IMSS**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+plt.figure(figsize=(12, 6))
+plt.plot(imss_ts.index, imss_ts.values, marker='o', ms=3)
+plt.title('Asegurados IMSS')
+plt.xlabel('Fecha')
+plt.ylabel('Número de Asegurados')
+plt.grid(alpha=0.3)
+plt.show()
+```
+
+Filtramos datos a partir de 2016 para observar mejor la tendencia en los últimos años.
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+imss_ts_2016 = imss_ts[imss_ts.index >= "2016-01-01"]
+plt.figure(figsize=(12, 6))
+plt.plot(imss_ts_2016.index, imss_ts_2016.values, marker='o', ms=5)
+plt.title('Asegurados IMSS (Desde 2016)')
+plt.xlabel('Fecha')
+plt.ylabel('Número de Asegurados')
+plt.grid(alpha=0.3)
+plt.show()
+```
+
+
+**Gráfica interactiva de la serie temporal de IMSS**
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+
+fig = px.line(x = imss_ts_2016.index, y = imss_ts_2016.values, title='Asegurados IMSS', labels={'y': 'Número de Asegurados', 'x': 'Fecha'})
+fig.update_xaxes(rangeslider_visible=True)
+```
+
+
+**Comparación anual IMSS**
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+# Preparación de datos para la gráfica de comparación anual
+df_imss_anual = imss_ts_2016.reset_index()
+df_imss_anual['Año'] = df_imss_anual['Fecha'].dt.year
+df_imss_anual['Mes'] = df_imss_anual['Fecha'].dt.month
+df_imss_anual["Nombre_mes"] = df_imss_anual['Fecha'].dt.strftime('%b')
+
+
+plt.figure(figsize=(12, 6))
+sns.lineplot(data=df_imss_anual, x='Nombre_mes', y='Asegurados_IMSS', hue='Año', marker='o', palette='tab10')
+plt.title('Comparación Anual de IMSS')
+plt.xlabel('Mes')
+plt.ylabel('Número de Asegurados')
+plt.legend(title='Año', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(alpha=0.3)
+plt.show()
+```
+
+**Comparación mensual de IMSS**
+
+
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+plt.figure(figsize=(12, 6))
+sns.lineplot(data=df_imss_anual, x='Año', y='Asegurados_IMSS', hue='Nombre_mes', marker='o', palette='tab10')
+plt.title('Comparación Mensual de IMSS')
+plt.xlabel('Año')
+plt.ylabel('Número de Asegurados')
+plt.legend(title='Mes', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(alpha=0.3)
+plt.show()
+```
+
+
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+fig = px.line(df_imss_anual, x='Año', y='Asegurados_IMSS', markers=True, color='Nombre_mes', title='Comparación Mensual de IMSS', labels={'Asegurados_IMSS': 'Número de Asegurados'})
+fig.update_layout(legend_title_text='Mes', plot_bgcolor='rgba(194, 190, 190, 0)', xaxis=dict(tickmode='linear'))
+fig.update
+fig.update_xaxes(dtick=1, gridcolor='rgba(138, 132, 132, 0.77)')
+fig.update_yaxes(gridcolor='rgba(138, 132, 132, 0.77)')
+
+```
+
+
+**Boxplot trimestral de IMSS**
+
+Con esta gráfica, se busca visualizar la distribución de los asegurados permanentes en el IMSS por trimestre a lo largo de los años. Esto permite identificar patrones estacionales, variabilidad y posibles outliers en cada trimestre, lo que es útil para el análisis de tendencias y la toma de decisiones informadas.
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+df_imss_anual['Trimestre'] = df_imss_anual['Fecha'].dt.to_period('Q')
+
+# Variable combinada de año y trimestre para el eje x
+df_imss_anual['Año_Trimestre'] = df_imss_anual['Año'].astype(str) + '-Q' + df_imss_anual['Trimestre'].dt.quarter.astype(str)
+
+plt.figure(figsize=(12, 6))
+sns.boxplot(data=df_imss_anual, x='Año_Trimestre', y='Asegurados_IMSS', hue='Año', palette= 'Paired')
+plt.title('Boxplot Trimestral de IMSS')
+plt.xlabel('Año-Trimestre')
+plt.ylabel('Número de Asegurados')
+plt.xticks(rotation=45)
+plt.grid(alpha=0.3)
+plt.legend(title='Año', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.show()
+
+
+```
+
+
+**Heatmap asegurados IMSS**
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+# Preparación de datos para el heatmap
+heatmap_data = df_imss_anual.pivot_table(index='Mes', columns='Año', values='Asegurados_IMSS')
+
+plt.figure(figsize=(12, 6))
+sns.heatmap(heatmap_data, annot=True, linewidths=0.5, fmt=".1e", cmap='Spectral')
+plt.title('Heatmap de Asegurados IMSS por Mes y Año')
+plt.xlabel('Año')
+plt.ylabel('Mes')
+plt.yticks(ticks = np.linspace(0.5, 11.5, 12), labels=[calendar.month_abbr[i] for i in range(1, 13)], rotation=0)
+plt.show()
+```
+
+
+**Superficie asegurados IMSS**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+Z = heatmap_data.values
+X = heatmap_data.columns.astype(str) #Años
+Y = calendar.month_abbr[1:13] #Meses
+
+fig = go.Figure(data=[go.Surface(z=Z, x=X, y=Y, 
+                contours=dict(
+        x=dict(
+            show=True,          # Líneas por año sobre la superficie
+            color="white",
+            width=2
+        ),
+        y=dict(
+            show=True,          # Líneas por mes sobre la superficie
+            color="white",
+            width=2
+        )
+    ),
+                colorscale='Spectral')])
+fig.update_layout(title='Superficie Asegurados IMSS',
+                  scene=dict(xaxis_title='Año', yaxis_title='Mes', zaxis_title='Número de Asegurados'),
+                  autosize=True,
+                  height=600)
+```
+
+
+**Descomposición de la serie temporal de IMSS**
+
+Una serie temporal $Y_t$ se puede descomponer en tres componentes principales: tendencia ($T_t$), estacionalidad ($S_t$) y ruido o componente aleatorio ($R_t$). La fórmula general para la descomposición aditiva es:
+
+\begin{equation}
+Y_t = T_t + S_t + R_t
+\end{equation}
+
+También existe la descomposición multiplicativa, que se expresa como:
+
+\begin{equation}
+Y_t = T_t \times S_t \times R_t
+\end{equation}
+
+
+**Descomposición aditiva de la serie temporal de IMSS**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+#| fig-cap: "Descomposición aditiva de la serie temporal de IMSS"
+
+decomposition_add = seasonal.seasonal_decompose(imss_ts_2016, model='additive', period=12)
+
+plt.figure(figsize=(12, 8))
+plt.subplot(4,1,1)
+plt.plot(imss_ts_2016,color='blue')
+plt.title('Serie Temporal Original')
+
+plt.subplot(4,1,2)
+plt.plot(decomposition_add.trend,color='orange')
+plt.title('Tendencia')
+
+plt.subplot(4,1,3)
+plt.plot(decomposition_add.seasonal,color='green')
+plt.title('Estacionalidad')
+
+plt.subplot(4,1,4)
+plt.plot(decomposition_add.resid,color='red')
+plt.title('Ruido')
+plt.tight_layout()
+plt.show()
+
+```
+
+
+**Descomposición multiplicativa de la serie temporal de IMSS**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+#| fig-cap: "Descomposición multiplicativa de la serie temporal de IMSS"
+
+decomposition_mul = seasonal.seasonal_decompose(imss_ts_2016, model='multiplicative', period=12)
+plt.figure(figsize=(12, 8))
+plt.subplot(4,1,1)
+plt.plot(imss_ts_2016,color='blue')
+plt.title('Serie Temporal Original')
+
+plt.subplot(4,1,2)
+plt.plot(decomposition_mul.trend,color='orange')
+plt.title('Tendencia')
+
+plt.subplot(4,1,3)
+plt.plot(decomposition_mul.seasonal,color='green')
+plt.title('Estacionalidad')
+
+plt.subplot(4,1,4)
+plt.plot(decomposition_mul.resid,color='red')
+plt.title('Ruido')
+plt.tight_layout()
+plt.show()
+```
+
+## Valores financieros
+
+Ahora vamos a graficar las series temporales de los precios de las acciones de Amazon (AMZN), Apple (AAPL),Microsoft (MSFT), Google (GOOGL) y Facebook (META) utilizando la biblioteca `yfinance` para obtener los datos históricos de las acciones y `matplotlib` para visualizarlos. Esto nos permitirá analizar la evolución de los precios de estas acciones a lo largo del tiempo y comparar su desempeño. El periodo de análisis se establece desde el 1 de enero de 2020 hasta el 31 de diciembre de 2025, lo que nos brinda una visión completa de su comportamiento durante estos años.
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+tickers = ["AMZN", "AAPL", "MSFT", "GOOGL", "META"]
+start_date = "2020-01-01"
+end_date = "2025-12-31"
+
+df_yf = yf.download(tickers, start=start_date, end=end_date, interval="1d")["Close"]
+```
+
+**Gráfica de los precios de las acciones**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+fig = go.Figure()
+for ticker in tickers:
+    fig.add_trace(go.Scatter(x=df_yf.index, y=df_yf[ticker], name=ticker))
+fig.update_layout(title='Precios de las acciones (2020-2025)', xaxis_title='Fecha', yaxis_title='Precio (USD)', legend_title_text='Acciones', hovermode='x unified')
+fig.update_xaxes(rangeslider_visible=True, gridcolor='rgba(138, 132, 132, 0.77)')
+fig.update_yaxes(gridcolor='rgba(138, 132, 132, 0.77)')
+fig.show()  
+```
+
+
+```{python}
+print(type(df_yf))
+print(df_yf.columns.tolist())
+print(df_yf.head(2))
+```
+
+
+Ahora seleccionamos la acción de Google (GOOGL) para realizar un análisis más detallado de su serie temporal, incluyendo la descomposición de la serie temporal para identificar sus componentes de tendencia, estacionalidad y ruido.
+
+**Candlestick de GOOGL**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+df_googl_ohlc = yf.download("GOOGL", start='2025-11-01', end='2025-12-31', interval="1d")
+googl = df_googl_ohlc.xs("GOOGL", level=1, axis=1)
+
+fig = go.Figure(data=[go.Candlestick(x=googl.index,
+                open=googl['Open'],
+                high=googl['High'],
+                low=googl['Low'],
+                close=googl['Close'])])
+fig.update_layout(title='Gráfico de Velas de GOOGL (2020-2025)', xaxis_title='Fecha', yaxis_title='Precio (USD)')
+fig.update_xaxes(rangeslider_visible=True, gridcolor='rgba(138, 132, 132, 0.77)')
+fig.update_yaxes(gridcolor='rgba(138, 132, 132, 0.77)')
+fig.show()
+```
+
+
+
+**Resumen estadístico de los precios de GOOGL**
+
+```{python}
+#| code-fold: true
+
+googl_ts = df_yf["GOOGL"].dropna()
+print(googl_ts.info())
+print(f"Fecha de inicio: {googl_ts.index.min()}")
+print(f"Fecha de fin: {googl_ts.index.max()}")
+print("------")
+print("Estadísticas descriptivas de GOOGL:")
+print(googl_ts.describe())
+
+```
+
+**Comparación anual de GOOGL**
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+googl_df = googl_ts.reset_index()
+googl_df['Año'] = googl_df['Date'].dt.year
+googl_df['Mes'] = googl_df['Date'].dt.month
+googl_df["Nombre_mes"] = googl_df['Date'].dt.strftime('%b')
+googl_df['Dia_año']   = googl_df['Date'].dt.dayofyear 
+
+plt.figure(figsize=(12, 6))
+sns.lineplot(data=googl_df, x='Nombre_mes', y='GOOGL', hue='Año', marker='o', palette='tab10')
+plt.title('Comparación Anual de GOOGL (Mensual)')
+plt.xlabel('Mes')
+plt.ylabel('Precio (USD)')
+plt.legend(title='Año', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(alpha=0.3)
+plt.show()
+```
+
+
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+#| code-fold: true
+#| fig-align: "center"
+
+plt.figure(figsize=(12, 6))
+sns.lineplot(
+    data=googl_df,
+    x='Dia_año',
+    y='GOOGL',
+    hue='Año',
+    palette='tab10',
+    errorbar=None
+)
+
+# Reemplazar números de día por nombres de mes en el eje X
+
+meses_dias = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]
+meses_nombres = ['Ene','Feb','Mar','Abr','May','Jun',
+                 'Jul','Ago','Sep','Oct','Nov','Dic']
+plt.xticks(ticks=meses_dias, labels=meses_nombres)
+
+plt.title('Comparación Anual de GOOGL (Diaria)')
+plt.xlabel('Mes')
+plt.ylabel('Precio (USD)')
+plt.legend(title='Año', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(alpha=0.3)
+plt.tight_layout()
+plt.show()
+```
+
+
+**Boxplot trimestral de GOOGL**
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+
+googl_df['Trimestre'] = googl_df['Date'].dt.to_period('Q')
+googl_df['Año_Trimestre'] = googl_df['Año'].astype(str) + '-Q' + googl_df['Trimestre'].dt.quarter.astype(str)
+
+plt.figure(figsize=(12, 6))
+sns.boxplot(data=googl_df, x='Año_Trimestre', y='GOOGL', hue='Año', palette= 'Paired')
+plt.title('Boxplot Trimestral de GOOGL')
+plt.xlabel('Año-Trimestre')
+plt.ylabel('Precio (USD)')
+plt.xticks(rotation=45)
+plt.grid(alpha=0.3)
+plt.legend(title='Año', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.show()
+```
+
+**Heatmap de GOOGL**
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+
+#| code-fold: true
+#| fig-align: "center"
+
+# Crear columna de día del año para ordenar correctamente
+googl_df['Mes-dia']  = googl_df['Date'].dt.strftime('%b-%d')
+
+
+heatmap_data_googl = googl_df.pivot_table(
+    index='Mes-dia',
+    columns='Año',
+    values='GOOGL'
+)
+
+# Ordenar por día del año (no alfabéticamente)
+orden = (googl_df.drop_duplicates('Mes-dia')
+                 .sort_values('Dia_año')['Mes-dia']
+                 .tolist())
+heatmap_data_googl = heatmap_data_googl.reindex(orden)
+
+# Rellenar NaN para eliminar líneas blancas
+heatmap_data_googl = heatmap_data_googl.ffill().bfill()
+
+plt.figure(figsize=(12, 8))
+sns.heatmap(
+    heatmap_data_googl,
+    annot=False,
+    cmap='Spectral',
+    linewidths=0,        
+    linecolor='none'     
+)
+plt.title('Heatmap de GOOGL por Fecha y Año')
+plt.xlabel('Año')
+plt.ylabel('Fecha')
+
+plt.tight_layout()
+plt.show()
+```
+
+
+**Superficie de GOOGL**
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+Z = heatmap_data_googl.values
+X = heatmap_data_googl.columns.astype(str) #Años
+Y = heatmap_data_googl.index #Fechas
+
+fig = go.Figure(data=[go.Surface(z=Z, x=X, y=Y, 
+                contours=dict(
+        x=dict(
+            show=True,          # Líneas por año sobre la superficie
+            color="white",
+            width=2
+        ),
+        y=dict(
+            show=True,          # Líneas por fecha sobre la superficie
+            color="white",
+            width=2
+        )
+    ),
+                colorscale='Spectral')])
+fig.update_layout(title='Superficie de GOOGL', scene=dict(xaxis_title='Año', yaxis_title='Fecha', zaxis_title='Precio (USD)'), autosize=True, height=600)
+```
+
+**Descomposición aditiva de GOOGL**
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+#| fig-cap: "Descomposición aditiva de la serie temporal de GOOGL"
+
+
+# Utilizar periodo de 252 para capturar la estacionalidad anual en datos diarios (252 días hábiles por año que es el estándar en finanzas)
+decomposition_add_googl = seasonal.seasonal_decompose(googl_ts, model='additive', period=252)
+plt.figure(figsize=(12, 8))
+plt.subplot(4,1,1)
+plt.plot(googl_ts,color='blue')
+plt.title('Serie Temporal Original')    
+
+plt.subplot(4,1,2)
+plt.plot(decomposition_add_googl.trend,color='orange')
+plt.title('Tendencia')
+
+plt.subplot(4,1,3)
+plt.plot(decomposition_add_googl.seasonal,color='green')
+plt.title('Estacionalidad')
+
+plt.subplot(4,1,4)
+plt.plot(decomposition_add_googl.resid,color='red')
+plt.title('Ruido')
+plt.tight_layout()
+plt.show()
+```
+
+**Descomposición multiplicativa de GOOGL**
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+#| fig-cap: "Descomposición multiplicativa de la serie temporal de GOOGL"
+
+decomposition_mul_googl = seasonal.seasonal_decompose(googl_ts, model='multiplicative', period=252)
+plt.figure(figsize=(12, 8))
+plt.subplot(4,1,1)
+plt.plot(googl_ts,color='blue')
+plt.title('Serie Temporal Original')
+
+plt.subplot(4,1,2)
+plt.plot(decomposition_mul_googl.trend,color='orange')
+plt.title('Tendencia')
+
+plt.subplot(4,1,3)
+plt.plot(decomposition_mul_googl.seasonal,color='green')
+plt.title('Estacionalidad')
+
+plt.subplot(4,1,4)
+plt.plot(decomposition_mul_googl.resid,color='red')
+plt.title('Ruido')
+plt.tight_layout()
+plt.show()
+```
+

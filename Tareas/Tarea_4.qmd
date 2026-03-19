@@ -1,0 +1,196 @@
+---
+title: "Tarea 4. Interpolación polinomial y con splines"
+author: "Mi nombre"
+lang: es
+format: 
+  html:
+    grid:
+      body-width: 1200px
+---
+
+
+Importamos packages y funciones necesarias:
+
+```{python}
+#| code-fold: true
+
+import matplotlib.pyplot as plt
+import numpy as np
+import math
+from scipy.interpolate import lagrange
+from numpy.polynomial.polynomial import Polynomial
+from scipy.interpolate import CubicSpline
+from scipy.stats import chi2
+import yfinance as yf
+import pandas as pd
+
+import matplotlib.ticker as ticker
+import seaborn as sns
+import plotly.express as px
+import plotly.graph_objects as go
+import calendar
+import statsmodels.api as sm
+import statsmodels.graphics.tsaplots as tsaplots
+import statsmodels.tsa.stattools as ts
+
+```
+
+
+::: {#exr-tarea4_1}
+Consideremos los siguientes puntos en $\mathbb{R}^2$:
+
+\begin{equation}
+\begin{array}{l|c|c|c|c|c|c} 
+\text{x} & 0 & 1 & 2 & 3 & 4 & 5\\
+\hline \text{y} & y_0 & y_1 & y_2 & y_3 & y_4 & y_5
+\end{array}
+\end{equation}
+
+a)  Encontrar y graficar los polinomios base para el polinomio de Lagrange que contiene a los puntos.
+
+b)  Calcular y graficar el polinomio de Lagrange.
+:::
+
+::: {#def-errores}
+Supongamos que $p^*$ es una aproximación de $p$. El **error real** es $p-p^*$, el **error absoluto** es $|p-p^*|$ y el error relativo es
+
+\begin{equation}
+\frac{|p-p^*|}{|p|},
+\end{equation}
+
+siempre y cuando $p\neq 0$.
+:::
+
+::: {#exr-tarea4_2}
+En cada inciso considera la función de valores reales y realiza lo siguiente:
+
+i.  Grafica los polinomios interpolantes de Lagrange con los puntos dados y aproxima el valor de la función y la derivada en el punto solicitado.
+
+ii. Grafica los splines cúbicos con frontera natural para los puntos dados y aproxima el valor de la función y la derivada en el punto solicitado.
+
+iii. Grafica los splines cúbicos con frontera condicionada para los puntos dados y aproxima el valor de la función y la derivada en el punto solicitado.
+
+En cada caso grafica el error real, el absoluto y el relativo.
+
+
+a)  $f(x)=x\,cos\,x-3x$. Puntos: $x_0=0, x_1=0.5, x_2=1, x_3=1.5$. Aproximar $f(0.8)$ y $f'(0.8)$.
+
+b)  $f(x)=log(e^x+2)$. Puntos: $x_0=-2, x_1=-1, x_2=0, x_3=1, x_4=2$. Aproximar $f(0.5)$ y $f'(0.5)$.
+
+c)  $f(x)=e^{x}+e^{-x}$. Puntos: $x_0=0, x_1=0.5, x_2=1, x_3=1.5, x_4=2$. Aproximar $f(0.75)$ y $f'(0.75)$.
+
+
+:::
+
+
+
+::: {#exr-tarea4_3}
+Considera la siguiente tabla de datos para el agua:
+
+\begin{equation}
+\begin{array}{|l|c|c|c|c|c|} 
+\hline \text{T(°C)} & 50 & 60 & 65 & 75 & 80\\
+ \text{$\rho (kg/m^3)$} & 988 & 985.7 & 980.5 & 974.8 & 971.6  \\
+\hline
+\end{array}
+\end{equation}
+
+Donde $T$ es la temperatura y $\rho$ es la densidad.
+
+a)  Hacer la representación gráfica del spline cúbico y compararlo con el polinomio interpolante $P_4(x)$.
+
+b)  Aproximar la densidad para $T=63 °C$ y también la derivada, tanto con el spline cúbico como con el polinomio de Lagrange. Comparar los resultados.
+:::
+
+::: {#exr-tarea4_4}
+Llevar a cabo lo siguiente:
+
+i.  Fija la semilla del generador de números pseudoaleatorios con `np.random.seed(z)`, donde $z$ es un entero de tu elección (por ejemplo, tu número de cuenta).
+
+ii. Genera una sucesión desde 0 hasta 10 con la función `np.arange` y asígnalo a la variable $x$.
+
+iii. Del conjunto $\{-25, -24, \dots, 24, 25\}\subset\mathbb{Z}$ toma una muestra con reemplazo que tenga la misma cantidad de elementos de $x$ y asígnalo a la variable $y$ (utilizar la función `np.random.choice`).
+
+iv. Construye manualmente el sistema tridiagonal para los coeficientes $c_j$ del spline cúbico natural, resuélvelo con `numpy` y determina los coeficientes $a_j$, $b_j$ y $d_j$ de cada pieza.
+
+v.  Verifica tu resultado comparándolo con el spline obtenido mediante `CubicSpline` de SciPy.
+:::
+
+
+
+
+
+
+::: {#exr-tarea4_5}
+Construye los splines cúbicos condicionados en $n+1$ nodos, donde $n= 4,5, 9, 19$ para las siguientes funciones en el intervalo dado (utilizar `plotly` para las gráficas). Con el de $n=19$ nodos grafica los errores real, absoluto y relativo.
+
+a)  $f(x) = e^{-x} sen\,(\pi x)$, $x\in [0,2]$.
+
+b)  $f(x) = x^2\, \log(1+x)$, $x\in [0,3]$.
+
+c)  $f(x) = cosh(x) sen(x)$, $x\in[0,\pi]$.
+
+d)  $f(x) = log(x) cos(x)$, $x\in [1,4]$.
+:::
+
+
+
+
+::: {#exr-tarea4_6}
+
+Una variable aleatoria continua $X$ sigue una distribución ji-cuadrada con $k$ grados de libertad, lo que se denota como $X \sim \chi^2(k)$, si su función de densidad de probabilidad es:
+
+\begin{equation}
+f(x) = \frac{1}{2^{k/2} \Gamma(k/2)} x^{k/2-1} e^{-x/2}, 
+\end{equation}
+
+para $x > 0$ y $k > 0$. Aquí $\Gamma$ es la función gamma, que generaliza el factorial a los números reales.
+
+El único parámetro de esta distribución es $k$, que representa los grados de libertad que, aunque puede ser cualquier número real positivo, regularmente son enteros positivos. La función de densidad de probabilidad de la distribución ji-cuadrada es asimétrica y se utiliza comúnmente en pruebas de hipótesis y análisis de varianza.
+
+Los grados de libertad representan **el número de variables independientes** que se suman para formar la variable aleatoria $X$. Específicamente:
+
+Si $Z_1, Z_2, \ldots, Z_k$ son $k$ variables aleatorias independientes que siguen una distribución normal estándar (es decir, $Z_i \sim N(0, 1)$ para $i = 1, 2, \ldots, k$), entonces la variable aleatoria $X$ definida como:
+
+\begin{equation}
+X = Z_1^2 + Z_2^2 + \ldots + Z_k^2\sim \chi^2(k)
+\end{equation}
+
+A continuación se muestra la función de densidad de probabilidad de la distribución ji-cuadrada para diferentes valores de $k$.
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+dfs = [3, 5, 7, 10, 12, 15]
+
+x = np.linspace(0, 30, 1000)
+plt.figure(figsize=(10, 6))
+for df in dfs:
+    plt.plot(x, chi2.pdf(x, df), label=f'k={df}')
+plt.title('Función de Densidad de Probabilidad de la Distribución Ji-Cuadrada')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.legend()
+plt.grid(alpha=0.3)
+plt.show()
+```
+
+Elige un valor de $k\geq 3$ y construye los splines cúbicos naturales para la función de densidad de probabilidad de la distribución ji-cuadrada con ese valor de $k$ en el intervalo $[0, 30]$ utilizando $n+1$ nodos equiespaciados para $n= 5, 7, 10, 15, 20$. Grafica (con `plotly`) cada spline junto con la función de densidad de probabilidad original. Grafica el error real, el absoluto y el relativo para cada spline (también con `plotly`).
+
+:::
+
+
+::: {#exr-tarea4_7}
+
+Selecciona dos indicadores económicos proporcionados por el Inegi que sean de tu interés. Elige un periodo de dos años y construye los splines cúbicos naturales para cada indicador. Brinda una interpretación de los resultados obtenidos.
+
+:::
+
+
+::: {#exr-tarea4_8}
+
+Selecciona los precios de cierre de dos acciones, descarga los datos mensuales utilizando `yfinance` y construye los splines cúbicos naturales para cada acción para un periodo de dos años. Brinda una interpretación de los resultados obtenidos.
+
+:::
