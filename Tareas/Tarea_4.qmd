@@ -75,6 +75,215 @@ En cada caso grafica el error real, el absoluto y el relativo.
 
 a)  $f(x)=x\,cos\,x-3x$. Puntos: $x_0=0, x_1=0.5, x_2=1, x_3=1.5$. Aproximar $f(0.8)$ y $f'(0.8)$.
 
+::: {.panel-tabset}
+
+## Lagrange
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+f = lambda x: x * np.cos(x) - 3 * x
+nodos = np.array([0, 0.5, 1, 1.5])
+values = f(nodos)
+x = np.linspace(0, 1.5, 200)
+pol_lagrange = lagrange(nodos, values)
+
+plt.figure(figsize=(8, 5))
+plt.plot(x, f(x), color = "#2e86c1", label = "$f(x)$", linewidth = 3)
+plt.plot(x, pol_lagrange(x), color = "#FF5733", label = "$P(x)$")
+plt.scatter(nodos, values, color = "#353a0d", zorder = 5, s = 80, label = "Puntos de Interpolación")
+plt.scatter(0.8, f(0.8), color='green', zorder=5, s=100, label='f(0.8)')
+plt.scatter(0.8, pol_lagrange(0.8), color='orange', zorder=5, s=100, label='P(0.8)')
+plt.grid(alpha = 0.3)
+plt.legend()
+plt.show()
+
+```
+
+
+
+
+**Errores**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+#| warning: false
+
+plt.figure(figsize=(8, 5))
+plt.plot(x, f(x) - pol_lagrange(x), color='red', label='Error Real')
+plt.plot(x, np.abs(f(x) - pol_lagrange(x)), color='blue', label='Error Absoluto')
+plt.plot(x, np.abs(f(x) - pol_lagrange(x)) / np.abs(f(x)), color='green', label='Error Relativo')
+plt.grid(alpha=0.3)
+plt.legend()
+plt.show()
+
+```
+
+
+
+```{python}
+#| code-fold: true
+
+print(f"Valor real f(0.8): {f(0.8)}")
+print(f"Valor aproximado P(0.8): {pol_lagrange(0.8)}")
+print(f"Error real: {f(0.8) - pol_lagrange(0.8)}")
+print(f"Error absoluto: {abs(f(0.8) - pol_lagrange(0.8))}")
+print(f"Error relativo: {abs(f(0.8) - pol_lagrange(0.8)) / abs(f(0.8))}")
+```
+
+Derivada $f'(x)= \cos x - x \sin x - 3$ 
+
+```{python}
+#| code-fold: true
+
+f_prime = lambda x: np.cos(x) - x * np.sin(x) - 3
+
+print(f"Valor real f'(0.8): {f_prime(0.8)}")
+print(f"Valor aproximado P'(0.8): {pol_lagrange.deriv()(0.8)}")
+print(f"Error real: {f_prime(0.8) - pol_lagrange.deriv()(0.8)}")
+print(f"Error absoluto: {abs(f_prime(0.8) - pol_lagrange.deriv()(0.8))}")
+print(f"Error relativo: {abs(f_prime(0.8) - pol_lagrange.deriv()(0.8)) / abs(f_prime(0.8))}")
+
+
+```
+
+## Spline natural
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+cs_natural = CubicSpline(nodos, values, bc_type='natural')
+plt.figure(figsize=(8, 5))
+plt.plot(x, f(x), color = "#2e86c1", label = "$f(x)$", linewidth = 3)
+plt.plot(x, cs_natural(x), color = "#FF5733", label = "$S(x)$")
+plt.scatter(nodos, values, color = "#353a0d", zorder = 5, s = 80, label = "Puntos de Interpolación")
+plt.scatter(0.8, f(0.8), color='green', zorder=5, s=100, label='f(0.8)')
+plt.scatter(0.8, cs_natural(0.8), color='orange', zorder=5, s=100, label='S(0.8)')
+plt.grid(alpha = 0.3)
+plt.legend()
+plt.show()
+
+```
+
+
+**Errores**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+#| warning: false
+
+plt.figure(figsize=(8, 5))
+plt.plot(x, f(x) - cs_natural(x), color='red', label='Error Real')
+plt.plot(x, np.abs(f(x) - cs_natural(x)), color='blue', label='Error Absoluto')
+plt.plot(x, np.abs(f(x) - cs_natural(x)) / np.abs(f(x)), color='green', label='Error Relativo')
+plt.grid(alpha=0.3)
+plt.legend()
+plt.show()
+```
+
+
+Valor en $x=0.8$.
+
+```{python}
+#| code-fold: true
+
+print(f"Valor real f(0.8): {f(0.8)}")
+print(f"Valor aproximado S(0.8): {cs_natural(0.8)}")
+print(f"Error real: {f(0.8) - cs_natural(0.8)}")
+print(f"Error absoluto: {abs(f(0.8) - cs_natural(0.8))}")
+print(f"Error relativo: {abs(f(0.8) - cs_natural(0.8)) / abs(f(0.8))}")
+
+```
+
+
+Derivada en $x=0.8$.
+
+```{python}
+#| code-fold: true
+
+print(f"Valor real f'(0.8): {f_prime(0.8)}")
+print(f"Valor aproximado S'(0.8): {cs_natural.derivative()(0.8)}")
+print(f"Error real: {f_prime(0.8) - cs_natural.derivative()(0.8)}")
+print(f"Error absoluto: {abs(f_prime(0.8) - cs_natural.derivative()(0.8))}")
+print(f"Error relativo: {abs(f_prime(0.8) - cs_natural.derivative()(0.8)) / abs(f_prime(0.8))}")
+```
+
+
+
+## Spline condicionado
+
+En el spline condicionado, se imponen condiciones adicionales en las derivadas en los extremos. En este caso, imponemos que la derivada del spline en los extremos sea igual a la derivada de la función original en esos puntos,
+
+Derivada $f'(x)= \cos x - x \sin x - 3$
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+
+cs_condicionado = CubicSpline(nodos, values, bc_type=((1, f_prime(0)), (1, f_prime(1.5))))
+plt.figure(figsize=(8, 5))
+plt.plot(x, f(x), color = "#2e86c1", label = "$f(x)$", linewidth = 3)
+plt.plot(x, cs_condicionado(x), color = "#FF5733", label = "$S(x)$")
+plt.scatter(nodos, values, color = "#353a0d", zorder = 5, s = 80, label = "Puntos de Interpolación")
+plt.scatter(0.8, f(0.8), color='green', zorder=5, s=100, label='f(0.8)')
+plt.scatter(0.8, cs_condicionado(0.8), color='orange', zorder=5, s=100, label='S(0.8)')
+plt.grid(alpha = 0.3)
+plt.legend()
+```
+
+
+**Errores**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+#| warning: false
+
+plt.figure(figsize=(8, 5))
+plt.plot(x, f(x) - cs_condicionado(x), color='red', label='Error Real')
+plt.plot(x, np.abs(f(x) - cs_condicionado(x)), color='blue', label='Error Absoluto')
+plt.plot(x, np.abs(f(x) - cs_condicionado(x)) / np.abs(f(x)), color='green', label='Error Relativo')
+plt.grid(alpha=0.3)
+plt.legend()
+plt.show()
+```
+
+Valor en $x=0.8$.
+
+```{python}
+#| code-fold: true
+
+print(f"Valor real f(0.8): {f(0.8)}")
+print(f"Valor aproximado S(0.8): {cs_condicionado(0.8)}")
+print(f"Error real: {f(0.8) - cs_condicionado(0.8)}")
+print(f"Error absoluto: {abs(f(0.8) - cs_condicionado(0.8))}")
+print(f"Error relativo: {abs(f(0.8) - cs_condicionado(0.8)) / abs(f(0.8))}")
+```
+
+Derivada en $x=0.8$.
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+#| warning: false
+
+print(f"Valor real f'(0.8): {f_prime(0.8)}")
+print(f"Valor aproximado S'(0.8): {cs_condicionado.derivative()(0.8)}")
+print(f"Error real: {f_prime(0.8) - cs_condicionado.derivative()(0.8)}")
+print(f"Error absoluto: {abs(f_prime(0.8) - cs_condicionado.derivative()(0.8))}")
+print(f"Error relativo: {abs(f_prime(0.8) - cs_condicionado.derivative()(0.8)) / abs(f_prime(0.8))}")
+```
+
+:::
+
+
+
 b)  $f(x)=log(e^x+2)$. Puntos: $x_0=-2, x_1=-1, x_2=0, x_3=1, x_4=2$. Aproximar $f(0.5)$ y $f'(0.5)$.
 
 c)  $f(x)=e^{x}+e^{-x}$. Puntos: $x_0=0, x_1=0.5, x_2=1, x_3=1.5, x_4=2$. Aproximar $f(0.75)$ y $f'(0.75)$.
@@ -114,6 +323,7 @@ iii. Del conjunto $\{-25, -24, \dots, 24, 25\}\subset\mathbb{Z}$ toma una muestr
 iv. Construye manualmente el sistema tridiagonal para los coeficientes $c_j$ del spline cúbico natural, resuélvelo con `numpy` y determina los coeficientes $a_j$, $b_j$ y $d_j$ de cada pieza.
 
 v.  Verifica tu resultado comparándolo con el spline obtenido mediante `CubicSpline` de SciPy.
+
 :::
 
 
@@ -179,8 +389,155 @@ plt.show()
 
 Elige un valor de $k\geq 3$ y construye los splines cúbicos naturales para la función de densidad de probabilidad de la distribución ji-cuadrada con ese valor de $k$ en el intervalo $[0, 30]$ utilizando $n+1$ nodos equiespaciados para $n= 5, 7, 10, 15, 20$. Grafica (con `plotly`) cada spline junto con la función de densidad de probabilidad original. Grafica el error real, el absoluto y el relativo para cada spline (también con `plotly`).
 
+Tomamos $k=10$ 
+
+**Nota.** Escoger un $k$ diferente. En este caso se escogió $k=10$ para que la función de densidad de probabilidad tenga una forma más interesante, pero puedes elegir otro valor de $k$ y repetir el proceso. Se calculó cada spline por separado para cada valor de $n$, aunque utilizar un ciclo para calcular cada spline automáticamente también es una opción, se decicidió calcular cada spline por separado para graficar posteriormente los errores de cada spline.
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+k = 10
+
+x = np.linspace(0, 30, 1000)
+
+x_values = np.linspace(0, 30, 6)
+y_values = chi2.pdf(x_values, k)
+cs_chi2_5 = CubicSpline(x_values, y_values, bc_type= 'natural')
+
+x_values = np.linspace(0, 30, 8)
+y_values = chi2.pdf(x_values, k)
+cs_chi2_7 = CubicSpline(x_values, y_values, bc_type= 'natural')
+
+x_values = np.linspace(0, 30, 11)
+y_values = chi2.pdf(x_values, k)
+cs_chi2_10 = CubicSpline(x_values, y_values, bc_type= 'natural')
+
+x_values = np.linspace(0, 30, 16)
+y_values = chi2.pdf(x_values, k)
+cs_chi2_15 = CubicSpline(x_values, y_values, bc_type= 'natural')
+
+x_values = np.linspace(0, 30, 21)
+y_values = chi2.pdf(x_values, k)
+cs_chi2_20 = CubicSpline(x_values, y_values, bc_type= 'natural')
+
+
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x= x, y= chi2.pdf(x, k), mode = 'lines', name = "f(x)", line = dict(color = "#a94d4d", width=2)))
+fig.add_trace(go.Scatter(x= x, y= cs_chi2_5(x), mode = 'lines', name = "S5", line = dict(color = "#a4dd1e", width=2)))
+fig.add_trace(go.Scatter(x= x, y= cs_chi2_7(x), mode = 'lines', name = "S7", line = dict(color = "#46844b", width=2)))
+fig.add_trace(go.Scatter(x= x, y= cs_chi2_10(x), mode = 'lines', name = "S10", line = dict(color = "#cfad40", width=2)))
+fig.add_trace(go.Scatter(x= x, y= cs_chi2_15(x), mode = 'lines', name = "S15",  line = dict(color = "#e03cd0", width=2)))
+fig.add_trace(go.Scatter(x= x, y= cs_chi2_20(x), mode = 'lines', name = "S20", line = dict(color = "#7a4da9", width=2)))
+fig.update_layout(xaxis_title = "x", yaxis_title = "Densidad de Probabilidad", template = 'plotly_white')
+
+fig.show()
+
+
+```
+
+
+
+**Errores**
+
+
+
+::: {.panel-tabset}
+
+## S5
+
+```{python}
+#| code-fold: true
+
+x = np.linspace(5, 30, 1000)
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x= x, y= chi2.pdf(x, k) - cs_chi2_5(x), mode = 'lines', name = "Error real", line = dict(color = "#a94d4d", width=3)))
+fig.add_trace(go.Scatter(x= x, y= np.abs(chi2.pdf(x, k) - cs_chi2_5(x)), mode = 'lines', name = "Error absoluto", line = dict(color = "#34dc45", width=3)))
+fig.add_trace(go.Scatter(x= x, y= np.abs(chi2.pdf(x, k) - cs_chi2_5(x))/ np.abs(chi2.pdf(x, k)), mode = 'lines', name = "Error relativo", line = dict(color = "#2a20bb", width=3)))
+fig.update_layout(xaxis_title = "x", yaxis_title = "Error", template = 'plotly_white')
+
+fig.show()
+```
+
+
+## S7
+
+```{python}
+#| code-fold: true
+
+
+x = np.linspace(3, 30, 1000)
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x= x, y= chi2.pdf(x, k) - cs_chi2_7(x), mode = 'lines', name = "Error real", line = dict(color = "#a94d4d", width=3)))
+fig.add_trace(go.Scatter(x= x, y= np.abs(chi2.pdf(x, k) - cs_chi2_7(x)), mode = 'lines', name = "Error absoluto", line = dict(color = "#34dc45", width=3)))
+fig.add_trace(go.Scatter(x= x, y= np.abs(chi2.pdf(x, k) - cs_chi2_7(x))/ np.abs(chi2.pdf(x, k)), mode = 'lines', name = "Error relativo", line = dict(color = "#2a20bb", width=3)))
+fig.update_layout(xaxis_title = "x", yaxis_title = "Error", template = 'plotly_white')
+
+fig.show()
+```
+
+## S10
+
+```{python}
+#| code-fold: true
+
+
+x = np.linspace(3, 30, 1000)
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x= x, y= chi2.pdf(x, k) - cs_chi2_10(x), mode = 'lines', name = "Error real", line = dict(color = "#a94d4d", width=3)))
+fig.add_trace(go.Scatter(x= x, y= np.abs(chi2.pdf(x, k) - cs_chi2_10(x)), mode = 'lines', name = "Error absoluto", line = dict(color = "#34dc45", width=3)))
+fig.add_trace(go.Scatter(x= x, y= np.abs(chi2.pdf(x, k) - cs_chi2_10(x))/ np.abs(chi2.pdf(x, k)), mode = 'lines', name = "Error relativo", line = dict(color = "#2a20bb", width=3)))
+fig.update_layout(xaxis_title = "x", yaxis_title = "Error", template = 'plotly_white')
+
+fig.show()
+```
+
+
+## S15
+
+```{python}
+#| code-fold: true
+
+
+x = np.linspace(3, 30, 1000)
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x= x, y= chi2.pdf(x, k) - cs_chi2_15(x), mode = 'lines', name = "Error real", line = dict(color = "#a94d4d", width=3)))
+fig.add_trace(go.Scatter(x= x, y= np.abs(chi2.pdf(x, k) - cs_chi2_15(x)), mode = 'lines', name = "Error absoluto", line = dict(color = "#34dc45", width=3)))
+fig.add_trace(go.Scatter(x= x, y= np.abs(chi2.pdf(x, k) - cs_chi2_15(x))/ np.abs(chi2.pdf(x, k)), mode = 'lines', name = "Error relativo", line = dict(color = "#2a20bb", width=3)))
+fig.update_layout(xaxis_title = "x", yaxis_title = "Error", template = 'plotly_white')
+
+fig.show()
+```
+
+
+## S20
+
+
+```{python}
+#| code-fold: true
+
+
+x = np.linspace(3, 30, 1000)
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x= x, y= chi2.pdf(x, k) - cs_chi2_20(x), mode = 'lines', name = "Error real", line = dict(color = "#a94d4d", width=3)))
+fig.add_trace(go.Scatter(x= x, y= np.abs(chi2.pdf(x, k) - cs_chi2_20(x)), mode = 'lines', name = "Error absoluto", line = dict(color = "#34dc45", width=3)))
+fig.add_trace(go.Scatter(x= x, y= np.abs(chi2.pdf(x, k) - cs_chi2_20(x))/ np.abs(chi2.pdf(x, k)), mode = 'lines', name = "Error relativo", line = dict(color = "#2a20bb", width=3)))
+fig.update_layout(xaxis_title = "x", yaxis_title = "Error", template = 'plotly_white')
+
+fig.show()
+```
+
+
 :::
 
+:::
 
 ::: {#exr-tarea4_7}
 

@@ -23,11 +23,336 @@ Sea $f(x)=x^4+2x^2-x-3$, demostrar que cada cada una de las siguientes funciones
 
 **(a)** $g_1(x) = \sqrt[4]{3+x-2x^2}$
 
+Sea $p$ tal que $f(p)=0$, entonces
+
+\begin{equation}
+p^4+2p^2-p-3 = 0
+\end{equation}
+
+Despejando $p$ del término $p^4$, tenemos
+
+\begin{equation}
+p= \sqrt[4]{-2p^2+p+3}
+\end{equation}
+
+
+Luego, la función $g_1(x) = \sqrt[4]{3+x-2x^2}$ tiene un punto fijo en $p$, es decir
+
+\begin{equation}
+p= g_1(p) = \sqrt[4]{3+p-2p^2}
+\end{equation}
+
+En esta caso también consideramos la raíz negativa $-g_1(x) = -\sqrt[4]{3+x-2x^2}$, que también tiene un punto fijo pero corresponde a la raíz negativa de $f$.
+
+
+```{python}
+#| code-fold: true
+#| fig-align: 'center'
+
+f = lambda x: x**4+2*x**2-x-3
+g1 = lambda x: (3+x-2*x**2)**(1/4)
+g1_neg = lambda x: -(3+x-2*x**2)**(1/4)
+root_1 = optimize.fixed_point(g1, x0=1)
+root_2 = optimize.fixed_point(g1_neg, x0=-0.8)
+
+
+
+x = np.linspace(-1, 1.5, 300)
+plt.figure(figsize=(6,6))
+plt.plot(x, f(x), color = "steelblue", label = "f(x)")
+plt.plot(x, g1(x), color = "darkgreen", label = "g1(x)")
+plt.plot(x, -g1(x), color = "goldenrod", label = "-g1(x)")
+plt.plot(x, x, color = "black", label = "y=x")
+plt.scatter(root_1, root_1, s=25, color= "#2f34bf", label = "Punto fijo 1", zorder = 5)
+plt.scatter(root_1, 0, s=25, color= "#2f34bf", label = "Raíz 1", zorder = 5)
+plt.scatter(root_2, root_2, s=25, color= "#ab2222", label = "Punto fijo 2", zorder = 5)
+plt.scatter(root_2, 0, s=25, color= "#c61e93", label = "Raíz 2", zorder = 5)
+# Personalizar gráfica
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+plt.axis('equal')  # Escala igual en ambos ejes
+plt.legend()
+plt.show()
+
+```       
+
+Comprobamos que los valores obtenidos corresponden a puntos fijos de $g_1$ y $-g_1$:
+
+```{python}
+#| code-fold: true
+
+print(f"g1({root_1}) = {g1(root_1)}")
+print(f"-g1({root_2}) = {-g1(root_2)}")
+```
+
+
+
+Comprobamos que ambos puntos fijos corresponden a raíces de $f$:
+
+```{python}
+#| code-fold: true
+
+print(f"Raíz positiva f({root_1}) = {f(root_1)}")
+print(f"Raíz negativa f({root_2}) = {f(root_2)}")
+```
+
+
+
+
 **(b)** $g_2(x) = \sqrt{\frac{3 + x - x^4}{2}}$
+
+Sea $p$ tal que $f(p)=0$, entonces
+
+\begin{equation}
+p^4+2p^2-p-3 = 0
+\end{equation}
+
+Despejando $p$ del término $p^2$, tenemos
+
+\begin{equation}
+p= \sqrt{\frac{3 + p - p^4}{2}}
+\end{equation}
+
+Luego, la función $g_2(x) = \sqrt{\frac{3 + x - x^4}{2}}$ tiene un punto fijo en $p$, es decir
+
+\begin{equation}
+p= g_2(p) = \sqrt{\frac{3 + p - p^4}{2}}
+\end{equation}
+
+
+También consideramos la raíz negativa $-g_2(x) = -\sqrt{\frac{3 + x - x^4}{2}}$, que también tiene un punto fijo, pero en la raíz negativa de $f$.
+
+
+```{python}
+#| code-fold: true
+#| fig-align: 'center'
+#| warning: false
+
+g2 = lambda x: np.sqrt((3 + x - x**4)/2)
+g2_neg = lambda x: -np.sqrt((3 + x - x**4)/2)
+root_1 = optimize.fixed_point(g2, x0=1)
+root_2 = optimize.fixed_point(g2_neg, x0=-0.8)
+
+
+
+x = np.linspace(-1, 1.5, 300)
+plt.figure(figsize=(6,6))
+plt.plot(x, f(x), color = "steelblue", label = "f(x)")
+plt.plot(x, g2(x), color = "darkgreen", label = "g2(x)")
+plt.plot(x, -g2(x), color = "goldenrod", label = "-g2(x)")
+plt.plot(x, x, color = "black", label = "y=x")
+plt.scatter(root_1, root_1, s=25, color= "#2f34bf", label = "Punto fijo 1", zorder = 5)
+plt.scatter(root_1, 0, s=25, color= "#2f34bf", label = "Raíz 1", zorder = 5)
+plt.scatter(root_2, root_2, s=25, color= "#ab2222", label = "Punto fijo 2", zorder = 5)
+plt.scatter(root_2, 0, s=25, color= "#c61e93", label = "Raíz 2", zorder = 5)
+# Personalizar gráfica
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+plt.axis('equal')  # Escala igual en ambos ejes
+plt.legend()
+plt.show()
+
+```
+
+
+Verificamos que los valores obtenidos corresponden a puntos fijos de $g_2$ y $-g_2$:
+
+```{python}
+#| code-fold: true
+
+print(f"g2({root_1}) = {g2(root_1)}")
+print(f"-g2({root_2}) = {-g2(root_2)}")
+```
+
+
+Comprobamos que ambos puntos fijos corresponden a raíces de $f$:
+
+```{python}
+#| code-fold: true
+
+print(f"Raíz positiva f({root_1}) = {f(root_1)}")
+print(f"Raíz negativa f({root_2}) = {f(root_2)}")
+```
+
 
 **(c)** $g_3(x) = \sqrt{\frac{x+3}{x^2+2}}$
 
+Una vez más, sea $p$ tal que $f(p)=0$, entonces
+
+\begin{eqnarray}
+p^4+2p^2-p-3 = 0 \quad & \implies & \quad p^4+2p^2 = p+3\\ 
+                  \quad & \implies & \quad p^2(p^2+2) = p+3\\
+                  \quad & \implies & \quad p = \sqrt{\frac{p+3}{p^2+2}} 
+\end{eqnarray}
+
+Luego, la función $g_3(x) = \sqrt{\frac{x+3}{x^2+2}}$ tiene un punto fijo en $p$, es decir
+
+\begin{equation}
+p= g_3(p) = \sqrt{\frac{p+3}{p^2+2}}
+\end{equation}
+
+También consideramos la raíz negativa $-g_3(x) = -\sqrt{\frac{x+3}{x^2+2}}$, que tiene un punto fijo en la raíz negativa de $f$.
+
+
+```{python}
+#| code-fold: true
+#| fig-align: 'center'
+
+g3 = lambda x: np.sqrt((x+3)/(x**2+2))
+g3_neg = lambda x: -np.sqrt((x+3)/(x**2+2))
+root_1 = optimize.fixed_point(g3, x0=1)
+root_2 = optimize.fixed_point(g3_neg, x0=-0.8)
+
+x = np.linspace(-1, 1.5, 300)
+plt.figure(figsize=(6,6))
+plt.plot(x, f(x), color = "steelblue", label = "f(x)")
+plt.plot(x, g3(x), color = "darkgreen", label = "g3(x)")
+plt.plot(x, -g3(x), color = "goldenrod", label = "-g3(x)")
+plt.plot(x, x, color = "black", label = "y=x")
+plt.scatter(root_1, root_1, s=25, color= "#2f34bf", label = "Punto fijo 1", zorder = 5)
+plt.scatter(root_1, 0, s=25, color= "#2f34bf", label = "Raíz 1", zorder = 5)
+plt.scatter(root_2, root_2, s=25, color= "#ab2222", label = "Punto fijo 2", zorder = 5)
+plt.scatter(root_2, 0, s=25, color= "#c61e93", label = "Raíz 2", zorder = 5)
+# Personalizar gráfica
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+plt.axis('equal')  # Escala igual en ambos ejes
+plt.legend()
+plt.show()
+```
+
+Verificamos que los valores obtenidos corresponden a puntos fijos de $g_3$ y $-g_3$:
+
+```{python}
+#| code-fold: true
+
+print(f"g3({root_1}) = {g3(root_1)}")
+print(f"-g3({root_2}) = {-g3(root_2)}")
+```
+
+Comprobamos que ambos puntos fijos corresponden a raíces de $f$:
+
+```{python}
+#| code-fold: true
+
+print(f"Raíz positiva f({root_1}) = {f(root_1)}")
+print(f"Raíz negativa f({root_2}) = {f(root_2)}")
+```
+
+
+
 **(d)** $g_4(x) = \frac{3x^4+2x^2+3}{4x^3+4x-1}$
+
+En este caso demostraremos ambas implicaciones, es decir, que si $p$ es un punto fijo de $g_4$ entonces $f(p)=0$, y que si $p$ es una raíz de $f$ entonces es un punto fijo de $g_4$.
+
+$\Rightarrow)$ Si $p$ es un punto fijo de $g_4$, entonces
+
+\begin{equation}
+p = g_4(p) = \frac{3p^4+2p^2+3}{4p^3+4p-1}
+\end{equation}
+
+Multiplicando ambos lados por $4p^3+4p-1$, tenemos
+
+\begin{equation}
+p(4p^3+4p-1) = 3p^4+2p^2+3 \quad \implies \quad 4p^4+4p^2-p - 3p^4- 2p^2-3=0
+\end{equation}
+
+Simplificando, obtenemos
+
+\begin{equation}
+p^4+2p^2-p-3=0
+\end{equation}
+
+Y por lo tanto $f(p)=0$.
+
+$\Leftarrow)$ Por el método de Newton-Rapshon, obtenemos la función de iteración para encontrar las raíces de $f$:
+
+\begin{equation}
+x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)} = x_n - \frac{x_n^4+2x_n^2-x_n-3}{4x_n^3+4x_n-1} = \frac{3x_n^4+2x_n^2+3}{4x_n^3+4x_n-1} 
+\end{equation}
+
+Es decir 
+
+\begin{equation}
+x_{n+1} = \frac{3x_n^4+2x_n^2+3}{4x_n^3+4x_n-1}
+\end{equation}
+
+Cuando $n\to \infty$, $x_n \to p$ y por lo tanto
+
+
+\begin{equation}
+p = \frac{3p^4+2p^2+3}{4p^3+4p-1} = g_4(p)
+\end{equation}
+
+Luego, si $p$ es una raíz de $f$ entonces es un punto fijo de $g_4$. En este caso, el método de punto fijo con $g_4$ es equivalente al método de Newton-Raphson para encontrar las raíces de $f$.
+
+Para la gráfica de $g_4$ habrá que definir dos intervalos, pues el denominador de $g_4$ se anula en 
+
+```{python}
+#| code-fold: true
+
+denominator = lambda x: 4*x**3 + 4*x - 1
+root_denominator = optimize.newton(denominator, x0= 0,x1=  1)
+print(f"El denominador de g4 se anula en x = {root_denominator}")
+```
+
+
+
+```{python}
+#| code-fold: true
+#| fig-align: 'center'
+
+g4 = lambda x: (3*x**4+2*x**2+3)/(4*x**3+4*x-1)
+root_1 = optimize.fixed_point(g4, x0=1)
+root_2 = optimize.fixed_point(g4, x0=-0.8)
+
+# El denominador de g4 se anula en x = 0.2367 luego, definimos dos intervalos para graficar g4: [-1, 0.2] y [0.3, 1.5]
+
+x_right = np.linspace(-1, 0, 300)
+x_left = np.linspace(0.5, 1.5, 300)
+
+
+plt.figure(figsize=(6,6))
+plt.plot(x, f(x), color = "steelblue", label = "f(x)")
+plt.plot(x_right, g4(x_right), color = "darkgreen", label = "g4(x) - derecha")
+plt.plot(x_left, g4(x_left), color = "darkgreen", label = "g4(x) - izquierda")
+plt.plot(x, x, color = "black", label = "y=x")
+plt.scatter(root_1, root_1, s=25, color= "#2f34bf", label = "Punto fijo 1", zorder = 5)
+plt.scatter(root_1, 0, s=25, color= "#2f34bf", label = "Raíz 1", zorder = 5)
+plt.scatter(root_2, root_2, s=25, color= "#ab2222", label = "Punto fijo 2", zorder = 5)
+plt.scatter(root_2, 0, s=25, color= "#c61e93", label = "Raíz 2", zorder = 5)
+# Personalizar gráfica
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+plt.axis('equal')  # Escala igual en ambos ejes
+plt.legend()
+plt.show()
+
+```
+
+
+Verificamos que los valores obtenidos corresponden a puntos fijos de $g_4$:
+
+```{python}
+#| code-fold: true
+
+print(f"g4({root_1}) = {g4(root_1)}")
+print(f"g4({root_2}) = {g4(root_2)}")
+```
+
+Y comprobamos que ambos puntos fijos corresponden a raíces de $f$:
+
+```{python}
+#| code-fold: true
+
+print(f"Raíz positiva f({root_1}) = {f(root_1)}")
+print(f"Raíz negativa f({root_2}) = {f(root_2)}")
+```
+
 
 :::
 
@@ -61,11 +386,161 @@ g(p) = p + 0.25(D(p) - S(p)) = p + 0.25(15e^{-0.4p} - 2p^{1.2} + 1).
 
 **(a)** Demostrar que existe un intervalo $[a, b]$ apropiado donde se cumplen las condiciones del teorema de existencia y unicidad del punto fijo. Justificar la elección de $a$ y $b$ verificando que $g([a,b]) \subseteq [a,b]$.
 
+
+Tomamos el intervalo $[2, 4]$ y verificamos que $g([2,4]) \subseteq [2,4]$:
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+g = lambda x: x + 0.25* (15* np.exp(-0.4*x)- 2*x**(1.2) + 1)
+
+x = np.linspace(2, 4, 300)
+plt.figure(figsize=(6,6))
+plt.plot(x, g(x), color = "steelblue", label = "g(x)")
+plt.plot(x, x, color = "black", label = "y=x")
+# Personalizar gráfica
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+plt.axis('equal')  # Escala igual en ambos ejes
+plt.legend()
+plt.show()
+```
+
+En particular, observamos que el máximo de $g$ en el intervalo $[2,4]$ es en $x=2$ y el mínimo en $x=4$:
+
+```{python}
+#| code-fold: true
+
+max_g = g(2)
+min_g = g(4)
+
+print(f"g(2) = {max_g}")
+print(f"g(4) = {min_g}")
+```
+
+
+Luego, $g([2,4]) = [2.368, 2.7862] \subseteq [2,4]$. Nótese que en este caso se pudo escoger un intervalo más pequeño, pero se escogió este intervalo para mostrar que no es necesario que el intervalo de convergencia sea tan pequeño, sino que basta con que $g$ mapee el intervalo dentro de sí mismo.
+
+
+
 **(b)** Analizar la condición $|g'(p)| \leq k < 1$ en dicho intervalo. Determinar explícitamente una constante de contracción $k$.
+
+La derivada de la función $g$ es $g'(p)= 1-0.25(6e^{-0.4p}+2.4p^0.2)$ y la segunda derivada es \begin{equation}
+g''(p) = 0.25(2.4e^{-0.4p} + 0.48p^{-0.8})
+\end{equation}
+Observamos que $g''(p) > 0$ para todo $p>0$, por lo tanto $g'(p)$ es creciente en el intervalo $[2,4]$. Evaluando la primera derivada en los extremos del intervalo, obtenemos
+
+```{python}
+#| code-fold: true
+
+g_prime = lambda x: 1-0.25*(6*np.exp(-0.4*x)+2.4*x**0.2)
+g_prime_2 = g_prime(2)
+g_prime_4 = g_prime(4)
+print(f"g'(2) = {g_prime_2}")
+print(f"g'(4) = {g_prime_4}")
+```
+
+
+Luego, $|g'(p)| \leq k < 1$ con $k = 0.4$ para todo $p \in [2,4]$. A continuación se muestra la gráfica de $g'(p)$ en el intervalo $[2,4]$:
+
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+
+
+x = np.linspace(2, 4, 300)
+plt.figure(figsize=(6,4.5))
+plt.plot(x, g_prime(x), color = "steelblue", label = "g'(x)")
+# Personalizar gráfica
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+plt.axis('equal')  # Escala igual en ambos ejes
+plt.legend()
+plt.show()
+```
+
+
 
 **(c)** Aplicar la iteración de punto fijo con hasta alcanzar una tolerancia de $10^{-6}$, reportando la tabla de iteraciones y la cota de error a posteriori en cada paso.
 
+
+Inicialmente, debemos brindar una versión modificada de la función de iteración de punto fijo para que reporte la tabla de iteraciones y la cota de error a posteriori en cada paso:
+
+```{python}
+def punto_fijo(g, p0, tol= 1e-5, itmax=500):
+    p = [p0]
+    errores = []
+    for i in range(itmax):
+        p_new = g(p0)
+        p.append(p_new)
+        error = abs(p_new - p0)
+        errores.append(error)
+        if error < tol:
+            return p, i+1, errores
+        p0 = p_new
+    raise RuntimeError(f"No se encontró un punto fijo en {itmax} iteraciones.")
+
+```
+
+
+Aplicamos la iteración de punto fijo con $p_0 = 3$ y una tolerancia de $10^{-6}$:
+
+```{python}
+#| code-fold: true
+
+p0 = 3
+puntos_fijos, iteraciones, errores = punto_fijo(g, p0, tol= 1e-6)
+# Imprimir tabla de iteraciones
+print("Iteración | Punto Fijo | Error a Posteriori")
+for i in range(iteraciones):
+    print(f"{i+1:9d} | {puntos_fijos[i]:.6f} | {errores[i]:.6e}")
+```
+
+
+Verificamos que el último valor de la tabla corresponde a un punto fijo de $g$:
+
+```{python}
+#| code-fold: true
+
+p_fijo = puntos_fijos[-1]
+print(f"g({p_fijo}) = {g(p_fijo)}")
+```
+
+Y graficamos:
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+x = np.linspace(2, 4, 300)
+plt.figure(figsize=(6,6))
+plt.plot(x, g(x), color = "steelblue", label = "g(x)")
+plt.plot(x, x, color = "black", label = "y=x")
+plt.scatter(puntos_fijos, puntos_fijos, s=25, color= "#2f34bf", label = "Punto fijos", zorder = 5)
+# Personalizar gráfica
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+plt.axis('equal')  # Escala igual en ambos ejes
+plt.legend()
+plt.show()
+```
+
+
+
+
+
+
 **(d)** Interpretar económicamente el precio de equilibrio $p^*$ obtenido: ¿qué implica sobre las cantidades de equilibrio $D(p^*)$ y $S(p^*)$?
+
+
+Desarrollar, y graficar las funciones de demanda y oferta para visualizar el equilibrio del mercado, además de la cantidad de equilibrio $D(p^*) = S(p^*)$. 
 
 :::
 
