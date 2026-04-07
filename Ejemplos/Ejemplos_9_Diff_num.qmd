@@ -1,0 +1,293 @@
+---
+title: "Ejemplos 9. Diferenciación numérica"
+lang: es
+format:
+  html:
+    grid:
+      body-width: 1200px 
+---
+
+
+```{python}
+#| echo: false
+
+import numpy as np
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+from scipy.differentiate import derivative
+#Para instalar numdifftools hay que escribir en la terminal: py -m pip install numdifftools
+import numdifftools as nd
+```
+
+
+Inicialmente declaramos las funciones para  los métodos de diferenciación numérica vistos en clase.
+
+**Fórmula de diferencias hacia adelante 3 puntos**
+
+```{python}
+def forward_diff_3pts(f, x, h):
+    return (-3*f(x) + 4*f(x+h) - f(x+2*h)) / (2*h)
+```
+
+**Fórmula de diferencias hacia atrás 3 puntos**
+
+```{python}
+def backward_diff_3pts(f, x, h):
+    return (3*f(x) - 4*f(x-h) + f(x-2*h)) / (2*h)
+```
+
+
+**Fórmula del punto medio de 3 puntos**
+
+```{python}
+def midpoint_diff_3pts(f, x, h):
+    return (f(x+h) - f(x-h)) / (2*h)
+```
+
+**Fórmula de diferencias centradas 5 puntos**
+
+```{python}
+def centered_diff_5pts(f, x, h):
+    return (f(x-2*h) - 8*f(x-h) + 8*f(x+h) - f(x+2*h)) / (12*h)
+```
+
+**Fórmula del extremo de 5 puntos**
+
+En este caso, si $h>0$ se obtiene la fórmula de diferencias hacia adelante y si $h<0$ se obtiene la fórmula de diferencias hacia atrás.
+
+
+```{python}
+def endpoint_diff_5pts(f, x, h):
+    return (-25*f(x) + 48*f(x+h) - 36*f(x+2*h) + 16*f(x+3*h) - 3*f(x+4*h)) / (12*h)
+```
+
+
+# Ejemplo 1
+
+Aproximar la derivada de la función $f(x) = xe^x$ en el intervalo $[-1, 1]$ con la fórmula del punto medio de tres puntos para tamaños de paso $h=0.1$ y $h=0.25$.
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+
+f = lambda x: x * np.exp(x)
+
+x_values = np.linspace(-1, 1, 100)
+
+plt.figure(figsize=(8, 5))
+plt.plot(x_values, f(x_values), label = "$f(x)$", linewidth = 2)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("Función f(x) = xe^x")
+plt.legend()
+plt.grid(alpha = 0.3)
+plt.show()
+
+
+```
+
+
+
+
+
+
+
+
+La derivada de la función es $f'(x) = e^x + xe^x$, para cada fórmula de diferenciación numérica se calculará el error absoluto con respecto a la derivada exacta.
+
+
+::: {.panel-tabset}
+
+## h = 0.1
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+
+df_exacta = lambda x: np.exp(x) + x * np.exp(x)
+
+
+h = 0.1
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x_values, y=df_exacta(x_values), mode='lines', name='f\'(x)'))
+fig.add_trace(go.Scatter(x=x_values, y=forward_diff_3pts(f, x_values, h), mode='lines', name='Forward 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=backward_diff_3pts(f, x_values, h), mode='lines', name='Backward 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=midpoint_diff_3pts(f, x_values, h), mode='lines', name='Midpoint 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=centered_diff_5pts(f, x_values, h), mode='lines', name='Centered 5 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=endpoint_diff_5pts(f, x_values, h), mode='lines', name='Forward 5 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=endpoint_diff_5pts(f, x_values, -h), mode='lines', name='Backward 5 Pts'))
+fig.update_layout(
+    title='Aproximación de la derivada de f(x) = xe^x con h=0.1', 
+    xaxis_title='x', 
+    yaxis_title='f\'(x)',
+    template='plotly_white',
+    width=800,
+    height=500)
+fig.show()      
+```
+
+
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(forward_diff_3pts(f, x_values, h) - df_exacta(x_values)), mode='lines', name='Forward 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(backward_diff_3pts(f, x_values, h) - df_exacta(x_values)), mode='lines', name='Backward 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(midpoint_diff_3pts(f, x_values, h) - df_exacta(x_values)), mode='lines', name='Midpoint 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(centered_diff_5pts(f, x_values, h) - df_exacta(x_values)), mode='lines', name='Centered 5 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(endpoint_diff_5pts(f, x_values, h) - df_exacta(x_values)), mode='lines', name='Forward 5 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(endpoint_diff_5pts(f, x_values, -h) - df_exacta(x_values)), mode='lines', name='Backward 5 Pts'))
+fig.update_layout(
+    title='Error absoluto para h=0.1', 
+    xaxis_title='x', 
+    yaxis_title='Error absoluto',
+    template='plotly_white',
+    width=800,
+    height=500)
+fig.show()      
+```
+
+
+
+
+## h = 0.25
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+
+
+h = 0.25
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x_values, y=df_exacta(x_values), mode='lines', name='f\'(x)'))
+fig.add_trace(go.Scatter(x=x_values, y=forward_diff_3pts(f, x_values, h), mode='lines', name='Forward 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=backward_diff_3pts(f, x_values, h), mode='lines', name='Backward 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=midpoint_diff_3pts(f, x_values, h), mode='lines', name='Midpoint 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=centered_diff_5pts(f, x_values, h), mode='lines', name='Centered 5 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=endpoint_diff_5pts(f, x_values, h), mode='lines', name='Forward 5 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=endpoint_diff_5pts(f, x_values, -h), mode='lines', name='Backward 5 Pts'))
+fig.update_layout(
+    title='Aproximación de la derivada de f(x) = xe^x con h=0.25', 
+    xaxis_title='x', 
+    yaxis_title='f\'(x)',
+    template='plotly_white',
+    width=800,
+    height=500)
+fig.show()      
+```
+
+
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(forward_diff_3pts(f, x_values, h) - df_exacta(x_values)), mode='lines', name='Forward 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(backward_diff_3pts(f, x_values, h) - df_exacta(x_values)), mode='lines', name='Backward 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(midpoint_diff_3pts(f, x_values, h) - df_exacta(x_values)), mode='lines', name='Midpoint 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(centered_diff_5pts(f, x_values, h) - df_exacta(x_values)), mode='lines', name='Centered 5 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(endpoint_diff_5pts(f, x_values, h) - df_exacta(x_values)), mode='lines', name='Forward 5 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(endpoint_diff_5pts(f, x_values, -h) - df_exacta(x_values)), mode='lines', name='Backward 5 Pts'))
+fig.update_layout(
+    title='Error absoluto para h=0.25', 
+    xaxis_title='x', 
+    yaxis_title='Error absoluto',
+    template='plotly_white',
+    width=800,
+    height=500)
+fig.show()      
+```
+
+:::
+
+
+
+
+En la tarea utilizaremos las funciones:
+
+-   `nd.Derivative` del package [numdifftools](https://numdifftools.readthedocs.io/en/latest/reference/numdifftools.html#numdifftools.core.Derivative). Donde están implementados los métodos que vimos en clase y además se pueden calcular las derivadas de orden superior.
+
+-   `derivative` de [Scipy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.differentiate.derivative.html#scipy.differentiate.derivative). Una de las particularidades del algoritmo implementado en esta función es que adapta el tamaño de paso (con el argumento `step_factor`). El argumento `order` corresponde al orden de convergencia (el exponente de $h$ en los términos de error), es decir, no se refiere a una derivada de orden superior.
+
+-   `np.gradient` del package [numpy](https://numpy.org/doc/stable/reference/generated/numpy.gradient.html). Esta función es adecuada para aproximar la derivada cuando sólo tenemos parejas ordenadas $(x_0, y_0), (x_1, y_1), \dots (x_n, y_n)$, es decir, no se cuenta con la expresión de la función $f$.
+
+
+
+Retomando el ejemplo con `nd.Derivative` con $h=0.1$.
+
+
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+
+
+
+x_values = np.linspace(-1, 1, 100)
+h = 0.1
+
+forward_diff_3pts_nd = nd.Derivative(f, step=h, method='forward', order=2, n=1)
+backward_diff_3pts_nd = nd.Derivative(f, step=h, method='backward', order=2, n=1)
+midpoint_diff_3pts_nd = nd.Derivative(f, step=h, method='central', order=2, n=1)
+centered_diff_5pts_nd = nd.Derivative(f, step=h, method='central', order=4, n=1)
+endpoint_diff_5pts_forward_nd = nd.Derivative(f, step=h, method='forward', order=4, n=1)
+endpoint_diff_5pts_backward_nd = nd.Derivative(f, step=h, method='backward', order=4, n=1)
+
+
+
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x_values, y=df_exacta(x_values), mode='lines', name='f\'(x)'))
+fig.add_trace(go.Scatter(x=x_values, y=forward_diff_3pts_nd(x_values), mode='lines', name='Forward 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=backward_diff_3pts_nd(x_values), mode='lines', name='Backward 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=midpoint_diff_3pts_nd(x_values), mode='lines', name='Midpoint 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=centered_diff_5pts_nd(x_values), mode='lines', name='Centered 5 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=endpoint_diff_5pts_forward_nd(x_values), mode='lines', name='Forward 5 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=endpoint_diff_5pts_backward_nd(x_values), mode='lines', name='Backward 5 Pts'))
+fig.update_layout(
+    title='Aproximación de la derivada de f(x) = xe^x con h=0.1', 
+    xaxis_title='x', 
+    yaxis_title='f\'(x)',
+    template='plotly_white',
+    width=800,
+    height=500)
+fig.show()      
+```
+
+
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(forward_diff_3pts_nd(x_values) - df_exacta(x_values)), mode='lines', name='Forward 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(backward_diff_3pts_nd(x_values) - df_exacta(x_values)), mode='lines', name='Backward 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(midpoint_diff_3pts_nd(x_values) - df_exacta(x_values)), mode='lines', name='Midpoint 3 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(centered_diff_5pts_nd(x_values) - df_exacta(x_values)), mode='lines', name='Centered 5 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(endpoint_diff_5pts_forward_nd(x_values) - df_exacta(x_values)), mode='lines', name='Forward 5 Pts'))
+fig.add_trace(go.Scatter(x=x_values, y=np.abs(endpoint_diff_5pts_backward_nd(x_values) - df_exacta(x_values)), mode='lines', name='Backward 5 Pts'))
+fig.update_layout(
+    title='Error absoluto para h=0.1', 
+    xaxis_title='x', 
+    yaxis_title='Error absoluto',
+    template='plotly_white',
+    width=800,
+    height=500)
+fig.show()      
+```
+
+# Ejemplo 2
+
+Aproximar la derivada de la función $f(x) = sen(x)cos(20x)$ en el intervalo $[-3,3]$.
+
+
+
+
+
+
