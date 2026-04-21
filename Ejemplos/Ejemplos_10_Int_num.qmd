@@ -1,0 +1,638 @@
+---
+title: "Ejemplos 10. Integración Numérica"
+lang: es
+format:
+  html:
+    grid:
+      body-width: 1200px 
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+from scipy.stats import norm
+from scipy import integrate
+```
+
+
+
+
+::: {#exm-integral_1}
+
+Calcular de manera exacta la integral,
+\begin{equation}
+\int_0^4 x e^x dx
+\end{equation}
+
+Inicialmente se grafica la función en el intervalo de integración y se indica el *área bajo la curva*.
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+a=0
+b=4
+
+f = lambda x: x * np.exp(x)
+x_values = np.linspace(-0.3, 4.3, 100)
+
+plt.figure(figsize=(8, 5))
+plt.plot(x_values, f(x_values), label=r'$f(x) = x e^x$')
+plt.fill_between(np.linspace(a, b, 100), f(np.linspace(a, b, 100)), alpha=0.3, color='orange', label='Área bajo la curva')
+plt.title('Gráfica de la función $f(x) = x e^x$')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.axhline(0, color='black', lw=1, ls='--')
+plt.axvline(0, color='black', lw=1, ls='--')
+plt.legend()
+plt.grid()
+plt.show()
+
+```
+
+
+Calcular la integral de manera exacta utilizando el método de integración por partes.
+
+\begin{eqnarray}
+\int_0^4 x e^x dx &=& \left. x e^x \right|_0^4 - \int_0^4 e^x dx \\
+&=& 4 e^4 - (e^4 - e^0) \\
+&=& 3 e^4 + 1
+\end{eqnarray}
+
+Es decir, 
+
+```{python}
+#| code-fold: true
+
+integral_exacta = 3 * np.exp(4) + 1
+print(f"El valor exacto de la integral es: {integral_exacta:.4f}")  
+```
+
+Declaramos las funciones necesarias para calcular la integral utilizando el método de integración numérica trapezoidal, Simpson, Simpson 3/8 y la regla de Boole, éstas funciones serán la base para la integración compuesta.
+
+
+```{python}
+def trapezoidal(f, a, b):
+    return (b - a) * (f(a) + f(b)) / 2
+
+def simpson(f, a, b):
+    x_0 =a
+    x_2 = b
+    h = (b - a) / 2
+    x_1 = x_0 + h
+    int_approx = (h / 3) * (f(x_0) + 4 * f(x_1) + f(x_2))
+    return int_approx
+
+def simpson_38(f, a, b):
+    x_0 = a
+    x_3 = b
+    h = (b - a) / 3
+    x_1 = x_0 + h
+    x_2 = x_0 + 2 * h
+    int_approx = (3 * h / 8) * (f(x_0) + 3 * f(x_1) + 3 * f(x_2) + f(x_3))
+    return int_approx
+
+def boole(f, a, b):
+    x_0 = a
+    x_4 = b
+    h = (b - a) / 4
+    x_1 = x_0 + h
+    x_2 = x_0 + 2 * h
+    x_3 = x_0 + 3 * h
+    int_approx = (2 * h / 45) * (7 * f(x_0) + 32 * f(x_1) + 12 * f(x_2) + 32 * f(x_3) + 7 * f(x_4))
+    return int_approx
+    
+```
+
+
+**Aproximación con el método trapezoidal:**
+Notemos que en este caso tenemos $h=4$.
+
+```{python}
+#| code-fold: true
+
+print("Aproximación con el método trapezoidal:")
+print(trapezoidal(f, a, b))
+print("Error absoluto:", abs(integral_exacta - trapezoidal(f, a, b)))   
+```
+
+Utilizamos la función `integrate.trapezoid` de la biblioteca `scipy`.
+
+```{python}
+#| code-fold: true
+
+print("Aproximación con la función `integrate.trapezoid` de `scipy`:")
+x_values = np.linspace(a, b, 2)
+y_values = f(x_values)
+print(integrate.trapezoid(y_values, x_values))
+print("Error absoluto:", abs(integral_exacta - integrate.trapezoid(y_values, x_values)))
+```
+
+
+**Aproximación con el método de Simpson:**
+Notemos que en este caso tenemos $h=2$.
+
+```{python}
+#| code-fold: true
+
+print("Aproximación con el método de Simpson:")
+print(simpson(f, a, b))
+print("Error absoluto:", abs(integral_exacta - simpson(f, a, b)))
+```
+
+Utilizamos la función `integrate.simpson` de la biblioteca `scipy`.
+
+```{python}
+#| code-fold: true
+
+print("Aproximación con la función `integrate.simpson` de `scipy`:")
+x_values = np.linspace(a, b, 3)
+y_values = f(x_values)
+print(integrate.simpson(y_values, x_values))
+print("Error absoluto:", abs(integral_exacta - integrate.simpson(y_values, x_values)))
+```
+
+
+**Aproximación con el método de Simpson 3/8:**
+Notemos que en este caso tenemos $h=\frac{4}{3}$.
+
+```{python}
+#| code-fold: true
+print("Aproximación con el método de Simpson 3/8:")
+print(simpson_38(f, a, b))
+print("Error absoluto:", abs(integral_exacta - simpson_38(f, a, b)))
+```
+
+
+
+
+**Aproximación con el método de Boole:**
+Notemos que en este caso tenemos $h=1$.
+```{python}
+#| code-fold: true
+print("Aproximación con el método de Boole:")
+print(boole(f, a, b))
+print("Error absoluto:", abs(integral_exacta - boole(f, a, b)))
+```
+
+
+**Aproximación con la regla trapezoidal compuesta:**
+En este caso, se divide el intervalo de integración en más subintervalos  y se aplica la regla del trapecio. Para este ejemplo, se divide el intervalo $[0, 4]$ en $n=12$ subintervalos de longitud $h=1/3$.
+
+```{python}
+#| code-fold: true
+
+n = 12
+h = (b - a) / n
+a_values = np.linspace(a, b, endpoint=False, num=n)  
+b_values = a_values + h
+trapezoidal_compuesto = sum(trapezoidal(f, a_i, b_i) for a_i, b_i in zip(a_values, b_values))
+print("Aproximación con la regla trapezoidal compuesta:")
+print(trapezoidal_compuesto)
+print("Error absoluto:", abs(integral_exacta - trapezoidal_compuesto))
+
+```
+
+Utilizamos la función `integrate.trapezoid` de la biblioteca `scipy` para la regla trapezoidal compuesta.
+
+```{python}
+#| code-fold: true
+
+print("Aproximación con la función `integrate.trapezoid` de `scipy` para la regla trapezoidal compuesta:")
+x_values = np.linspace(a, b, n+1)
+y_values = f(x_values)
+print(integrate.trapezoid(y_values, x_values))
+print("Error absoluto:", abs(integral_exacta - integrate.trapezoid(y_values, x_values)))
+```
+
+
+
+**Aproximación con el método de Simpson compuesto:**
+En este caso, se divide el intervalo de integración en subintervalos más pequeños y se aplica el método de Simpson en cada subintervalo. Para este ejemplo, se divide el intervalo $[0, 4]$ en $n=12$ subintervalos de longitud $h=1/3$.
+
+```{python}
+#| code-fold: true
+
+n = 12
+h = (b - a) / n
+a_values = np.linspace(a, b, endpoint=False, num=int(n/2))  
+b_values = a_values + 2*h
+simpson_compuesto = sum(simpson(f, a_i, b_i) for a_i, b_i in zip(a_values, b_values))
+print("Aproximación con el método de Simpson compuesto:")
+print(simpson_compuesto)
+print("Error absoluto:", abs(integral_exacta - simpson_compuesto))
+```
+
+
+Utilizamos la función `integrate.simpson` de la biblioteca `scipy` para el método de Simpson compuesto.
+
+```{python}
+#| code-fold: true
+
+print("Aproximación con la función `integrate.simpson` de `scipy` para el método de Simpson compuesto:")
+x_values = np.linspace(a, b, n+1)
+y_values = f(x_values)
+print(integrate.simpson(y_values, x_values))
+print("Error absoluto:", abs(integral_exacta - integrate.simpson(y_values, x_values)))
+```
+
+
+**Aproximación con el método de Simpson 3/8compuesto:**
+Para este ejemplo, también se divide el intervalo $[0, 4]$ en $n=12$ subintervalos de longitud $h=1/3$.
+
+```{python}
+#| code-fold: true
+
+n = 12
+h = (b - a) / n
+a_values = np.linspace(a, b, endpoint=False, num=int(n/3))  
+b_values = a_values + 3*h
+simpson_38_compuesto = sum(simpson_38(f, a_i, b_i) for a_i, b_i in zip(a_values, b_values))
+print("Aproximación con el método de Simpson 3/8 compuesto:")
+print(simpson_38_compuesto)
+print("Error absoluto:", abs(integral_exacta - simpson_38_compuesto))
+```
+
+**Aproximación con el método de Boole compuesto:**
+Para este ejemplo, se divide el intervalo $[0, 4]$ en $n=12$ subintervalos de longitud $h=1/3$.
+
+```{python}
+#| code-fold: true
+n = 12              
+h = (b - a) / n
+a_values = np.linspace(a, b, endpoint=False, num=int(n/4))
+b_values = a_values + 4*h
+boole_compuesto = sum(boole(f, a_i, b_i) for a_i, b_i in zip(a_values, b_values))
+print("Aproximación con el método de Boole compuesto:")
+print(boole_compuesto)
+print("Error absoluto:", abs(integral_exacta - boole_compuesto))
+```
+
+
+Scipy tiene también integrado un método ,`integrate.quad`, que utiliza técnicas de cuadratura adaptativa para calcular la integral de manera eficiente y precisa. Este método es especialmente útil para funciones que pueden ser difíciles de integrar con métodos numéricos simples. Esta función, además de devolver la aproximación de la integral, también devuelve una estimación del error absoluto de la aproximación.
+
+```{python}
+#| code-fold: true
+
+print("Aproximación con la función `integrate.quad` de `scipy`:")
+integral_quad, error_quad = integrate.quad(f, a, b)
+print(integral_quad)
+print("Error absoluto:", abs(integral_exacta - integral_quad))
+print("Estimación del error absoluto proporcionada por `integrate.quad`:", error_quad)
+```
+
+:::
+
+
+::: {#exm-integral_2}
+
+Calcula de manera exacta y aproximada la integral,
+\begin{equation}
+\int_0^{\frac{3}{2}} \frac{2x}{x^2-4} dx
+\end{equation}
+
+
+Inicialmente se grafica la función en el intervalo de integración y se indica el *área sobre la curva*.
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+a=0
+b=3/2
+
+f = lambda x: 2*x/(x**2 - 4)
+x_values = np.linspace(-1, 1.7, 100)
+
+plt.figure(figsize=(8, 5))
+plt.plot(x_values, f(x_values), label='f(x)')
+plt.fill_between(np.linspace(a, b, 100), f(np.linspace(a, b, 100)), alpha=0.3, color='orange', label='Área sobre la curva')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.axhline(0, color='black', lw=1, ls='--')
+plt.axvline(0, color='black', lw=1, ls='--')
+plt.legend()
+plt.grid()
+plt.show()
+
+```
+
+
+En este caso el valor exacto de la integral es:
+
+\begin{eqnarray}
+\int_0^{\frac{3}{2}} \frac{2x}{x^2-4} dx &=& \left. \log|x^2 - 4| \right|_0^{\frac{3}{2}} \\
+&=& log\left|\left(\frac{3}{2}\right)^2 - 4\right| - log|0^2 - 4| \\
+&=& log\left|\frac{-7}{4}\right| - log(4) \\
+&=& log\left(\frac{7}{4} \cdot \frac{1}{4}\right) \\
+&=& log\left(\frac{7}{16}\right)
+\end{eqnarray}      
+
+Es decir,
+
+```{python}
+#| code-fold: true
+integral_exacta = np.log(7/16)
+print(f"El valor exacto de la integral es: {integral_exacta:.8f}")  
+```
+
+
+
+:::
+
+
+::: {#exm-integral_3}
+
+Consideremos la función de densidad de una distribución normal estándar dada por,
+\begin{equation}
+f(x) = \frac{e^{-\frac{x^2}{2}}}{\sqrt{2\pi}} 
+\end{equation}
+
+Aproximar la integral en el intervalo $[-1, 2]$.
+
+Inicialmente se grafica la función en el intervalo de integración y se indica el *área bajo la curva*.
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+a=-1
+b=2
+
+f = lambda x: norm.pdf(x)
+x_values = np.linspace(-4, 4, 200)
+
+plt.figure(figsize=(8, 5))
+plt.plot(x_values, f(x_values), label='f(x)')
+plt.fill_between(np.linspace(a, b, 100), f(np.linspace(a, b, 100)), alpha=0.3, color='#AAA111', label='Área bajo la curva')  
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.axhline(0, color='black', lw=1, ls='--')
+plt.axvline(0, color='black', lw=1, ls='--')
+plt.legend()
+plt.grid()
+plt.show()
+```
+
+
+El valor de esta integral se puede calcular utilizando la función de distribución acumulada de la distribución normal estándar.
+
+
+```{python}
+#| code-fold: true
+
+integral_cdf = norm.cdf(b) - norm.cdf(a)
+print(f"El valor de la integral con cdf es: {integral_cdf:.8f}")  
+```
+
+
+**Aproximación con la regla de Simpson:**
+
+```{python}
+#| code-fold: true
+
+print("Aproximación con el método de Simpson:")
+print(integrate.simpson(f(np.linspace(a, b, 100)), np.linspace(a, b, 100)))
+```
+
+**Aproximación con la función `integrate.quad` de `scipy`:**
+
+```{python}
+#| code-fold: true
+
+print("Aproximación con la función `integrate.quad` de `scipy`:")
+integral_quad, error_quad = integrate.quad(f, a, b)
+print(integral_quad)
+print("Error absoluto:", abs(integral_cdf - integral_quad))
+print("Estimación del error absoluto proporcionada por `integrate.quad`:", error_quad)
+```
+
+:::
+
+
+
+::: {#exm-integral_4}
+
+Aproximar el valor de la integral doble
+
+\begin{equation}
+\int_0^4 \int_0^3 (3x^2+y^2) dx dy
+\end{equation}
+
+
+Inicialmente se grafica la función en el dominio de integración y se indica el *volumen bajo la superficie*.
+
+```{python}
+#| code-fold: true
+
+x = np.linspace(1, 4, 50)  
+y = np.linspace(0, 3, 50)  
+X, Y = np.meshgrid(x, y)
+Z = 3 * X**2 + Y**2  
+
+# Crear la superficie principal
+surface = go.Surface(x=X, y=Y, z=Z, colorscale='viridis', opacity=0.9)
+
+# Crear las paredes laterales para representar el volumen debajo de la superficie
+
+# Pared en x = 1
+X_wall1, Y_wall1 = np.meshgrid(np.ones_like(y), y)
+Z_wall1 = np.vstack([np.zeros_like(y), 3 * X_wall1[0]**2 + Y_wall1[0]**2])  # Desde 0 hasta f(1, y)
+
+# Pared en x = 4
+X_wall2, Y_wall2 = np.meshgrid(4* np.ones_like(y), y)
+Z_wall2 = np.vstack([np.zeros_like(y), 3 * X_wall2[0]**2 + Y_wall2[0]**2])  # Desde 0 hasta f(4, y)
+
+# Pared en y = 0
+X_wall3, Y_wall3 = np.meshgrid(x, np.zeros_like(x) )
+Z_wall3 = np.vstack([np.zeros_like(x), 3 * X_wall3[0]**2])  # Desde 0 hasta f(x, 0)
+
+# Pared en y = 3
+X_wall4, Y_wall4 = np.meshgrid(x, 3*np.ones_like(x))
+Z_wall4 = np.vstack([np.zeros_like(x), 3 * X_wall4[0]**2 + 9])  # Desde 0 hasta f(x, 3)
+
+# Convertir las paredes a superficies
+walls = [
+    go.Surface(x=X_wall1, y=Y_wall1, z=Z_wall1, colorscale='Blues', showscale=False, opacity=0.5),
+    go.Surface(x=X_wall2, y=Y_wall2, z=Z_wall2, colorscale='Blues', showscale=False, opacity=0.5),
+    go.Surface(x=X_wall3, y=Y_wall3, z=Z_wall3, colorscale='Blues', showscale=False, opacity=0.5),
+    go.Surface(x=X_wall4, y=Y_wall4, z=Z_wall4, colorscale='Blues', showscale=False, opacity=0.5)
+]
+
+# Plano base en Z=0
+base = go.Surface(x=X, y=Y, z=np.zeros_like(Z), colorscale='Blues', showscale=False, opacity=0.3)
+
+# Configurar la figura
+fig = go.Figure(data=[surface, base] + walls)
+
+fig.update_layout(
+    title="Superficie f(x,y) = 3x² + y² y volumen",
+    scene=dict(
+        xaxis_title="X",
+        yaxis_title="Y",
+        zaxis_title="Z",
+        xaxis=dict(range=[0.5, 4.5]),
+        yaxis=dict(range=[-0.5, 3.5]),
+        zaxis=dict(range=[0, np.max(Z)])
+    )
+)
+
+# Mostrar la gráfica
+fig.show()
+```
+
+
+El valor exacto de esta integral es $144$. Para brindar la aproximación numérica, se puede utilizar la función `integrate.dblquad` de la biblioteca `scipy`, que permite calcular integrales dobles de manera eficiente.
+
+```{python}
+#| code-fold: true
+
+# Nótese que el primer argumento es y
+f = lambda y, x: 3*x**2 + y**2
+# El primer intervalo de integración corresponde a x, y el segundo a y
+integral_doble, error_doble = integrate.dblquad(f, 0, 3, 1, 4)
+print(f"Aproximación con la función `integrate.dblquad` de `scipy`:")
+print(integral_doble)
+print("Error absoluto:", abs(144 - integral_doble))
+print("Estimación del error absoluto proporcionada por `integrate.dblquad`:", error_doble)
+
+```
+
+
+:::
+
+
+::: {#exm-integral_5}
+
+Calcular el valor de la integral,
+\begin{equation}
+\int_0^2 \int_0^{e^x} \sqrt{1+e^x} dy dx
+\end{equation}
+
+```{python}
+#| code-fold: true
+
+f = lambda y, x: np.sqrt(1 + np.exp(x))
+integral_doble, error_doble = integrate.dblquad(f, 0, 2, 0, lambda x: np.exp(x))
+print(f"Aproximación con la función `integrate.dblquad` de `scipy`:")
+print(integral_doble)
+print("Estimación del error absoluto proporcionada por `integrate.dblquad`:", error_doble)
+```
+
+:::
+
+
+::: {#exm-integral_6}
+
+Aproximar el valor de la integral triple,
+\begin{equation}
+\int_0^1 \int_x^{5x} \int_0^y 5xyz dz dy dx
+\end{equation}
+
+Utilizamos la función `integrate.tplquad` de la biblioteca `scipy`, que permite calcular integrales triples de manera eficiente. Al definir la función $f(x,y,z) = 5xyz$ es necesario brindar los argumentos en el orden $z,y,x$.
+
+```{python}
+#| code-fold: true
+
+
+f = lambda z, y, x: 5*x*y*z
+integral_triple, error_triple = integrate.tplquad(f, 0, 1, lambda x: x, lambda x: 5*x, 0, lambda x, y: y)
+print(f"Aproximación con la función `integrate.tplquad` de `scipy`:")
+print(integral_triple)
+print("Estimación del error absoluto proporcionada por `integrate.tplquad`:", error_triple)
+```
+
+:::
+
+
+
+::: {#exm-integral_7}
+
+**Un método para aproximar el valor de $\pi$**
+
+Una forma de aproximar el valor de $\pi/4$ es utilizando la siguiente integral:
+\begin{equation}
+\int_0^1 \sqrt{1-x^2} dx
+\end{equation}
+
+Esta integral representa el área bajo la curva de la función $f(x) = \sqrt{1-x^2}$ en el intervalo $[0, 1]$, que corresponde a un cuarto de círculo unitario. Por lo tanto, el valor de esta integral es $\pi/4$.
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+a=0
+b=1
+f = lambda x: np.sqrt(1 - x**2)
+x_values = np.linspace(0, 1, 100)
+
+plt.figure(figsize=(8, 5))
+plt.plot(x_values, f(x_values), label=r'$f(x)$')
+plt.fill_between(x_values, f(x_values), alpha=0.3, color = '#333AAA')
+plt.xlabel(r'$x$')
+plt.ylabel(r'$f(x)$')
+plt.legend()
+plt.grid(True)
+plt.axis('equal')
+plt.show()
+```
+
+**Aproximación de la integral**
+
+```{python}
+#| code-fold: true
+integral_approx, error_approx = integrate.quad(f, a, b)
+print(f"Aproximación de la integral con `integrate.quad` de `scipy`:")
+print(integral_approx)
+print("Estimación del error absoluto proporcionada por `integrate.quad`:", error_approx)
+print("Valor aproximado de π:", integral_approx * 4)
+```
+
+**Método de Montecarlo para aproximar la integral**
+
+```{python}
+#| code-fold: true 
+#| fig-align: "center" 
+
+N = 1000
+
+ymin = 0
+ymax = 1
+
+x_random = np.random.uniform(a, b, N)
+y_random = np.random.uniform(ymin, ymax, N)
+
+puntos_in = y_random <= f(x_random)
+
+
+plt.figure(figsize=(8, 5))
+plt.scatter(x_random[puntos_in], y_random[puntos_in], color='green', s=10, label='In')
+plt.scatter(x_random[~puntos_in], y_random[~puntos_in], color='red', s=10, label='Out')
+plt.plot(x_values, f(x_values), color='blue', label=r'$f(x)$')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Método de Montecarlo para aproximar la integral')
+plt.legend()
+plt.grid()
+plt.axis('equal')
+plt.show()
+```
+
+
+```{python}
+#| code-fold: true
+integral_montecarlo = (ymax - ymin) * (b - a) * np.sum(puntos_in) / N
+print(f"Aproximación de la integral con el método de Montecarlo:")
+print(integral_montecarlo)
+print("Valor aproximado de π con Montecarlo:", integral_montecarlo * 4)
+```
+
+:::
+
+
+
+
