@@ -1,0 +1,266 @@
+---
+title: "Ejemplos 11. EDOs y Método de Euler"
+lang: es
+format:
+  html:
+    grid:
+      body-width: 1200px 
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from scipy.stats import norm
+from scipy import integrate
+from scipy import optimize
+
+```
+
+
+
+Utilizando el teorema de existencia y unicidad para las soluciones de problemas de valor inicial, determine si las siguientes ecuaciones diferenciales ordinarias tienen una solución única para el valor inicial e intervalo dado, y si es así, determina la solución general de la ecuación diferencial ordinaria. Finalmente, aproximar la solución utilizando el método de Euler, comparar la aproximación con la solución exacta y brindar una gráfica del error de la aproximación.
+
+::: {#exm-lipschitz_1}
+
+
+$y' = y \cos(t)$, con $y(0) = 1$ y $t \in [0, 1]$.
+
+En este caso, la función $f(t, y) = y \cos(t)$ es continua en el intervalo dado y 
+\begin{equation}
+\left|\frac{\partial f}{\partial y}(t,y)\right| = |\cos(t)| \leq 1.
+\end{equation}
+Por lo tanto, por el teorema de existencia y unicidad, la ecuación diferencial tiene una solución única para el valor inicial dado.
+
+Para encontrar la solución general, podemos separar las variables:
+\begin{equation}
+\frac{dy}{y}(t) = \cos(t) dt.
+\end{equation}
+Integrando ambos lados, obtenemos:
+\begin{equation}
+\log|y(t)| = \sin(t) + C,
+\end{equation}
+y por lo tanto,
+\begin{equation}
+y(t) = e^{\sin(t) + C} = e^C e^{\sin(t)}.
+\end{equation}
+Utilizando la condición inicial $y(0) = 1$, obtenemos:
+\begin{equation}
+1 = e^C e^{\sin(0)} = e^C,
+\end{equation}
+lo que implica que $C = 0$. Por lo tanto, la solución única es:
+\begin{equation}
+y(t) = e^{\sin(t)}.
+\end{equation}
+
+En la siguiente gráfica se muestra la solución de la ecuación diferencial ordinaria $y' = y \cos(t)$ con la condición inicial $y(0) = 1$, la aproximación utilizando el método de Euler y la derivada de la solución exacta.
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+y_sol = lambda t: np.exp(np.sin(t))
+y_deriv = lambda t: y_sol(t) * np.cos(t)
+t_values = np.linspace(0, 1, 100)
+
+h = 0.1
+t_euler = np.arange(0, 1 + h, h)
+y_euler = np.zeros_like(t_euler)
+y_euler[0] = 1
+for i in range(1, len(t_euler)):
+    y_euler[i] = y_euler[i-1] + h * y_euler[i-1] * np.cos(t_euler[i-1])
+
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_values, y_sol(t_values), label='y(t)')
+plt.plot(t_euler, y_euler, 'o-', label='Aprox Euler')
+plt.plot(t_values, y_deriv(t_values), label="y'(t)", linestyle='--')
+plt.xlabel('t')
+plt.ylabel('y(t)/y\'(t)')
+#plt.axhline(0, color='black', lw=1, ls='--')
+plt.axvline(0, color='black', lw=1, ls='--')
+plt.legend()
+plt.grid()
+plt.show()
+
+```
+
+**Gráfica del error absoluto de la aproximación utilizando el método de Euler:**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+error_euler = np.abs(y_sol(t_euler) - y_euler)
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_euler, error_euler, 'o-', label='Error Absoluto')
+plt.xlabel('t')
+plt.ylabel('Error Absoluto')
+plt.axhline(0, color='black', lw=1, ls='--')
+plt.axvline(0, color='black', lw=1, ls='--')
+plt.legend()
+plt.grid()
+plt.show()
+
+```
+
+:::
+
+
+::: {#exm-lipschitz_2}
+
+$y' = - \frac{2}{t} y+ t^2e^t$, con $y(1) = \sqrt{2}e$ y $t \in [1, 2]$.
+
+En este caso, la función $f(t, y) = - \frac{2}{t} y + t^2 e^t$ es continua en el intervalo dado y
+\begin{equation}
+\left|\frac{\partial f}{\partial y}(t,y)\right| = \left| - \frac{2}{t} \right| = \frac{2}{t} \leq 2.
+\end{equation}
+Por lo tanto, por el teorema de existencia y unicidad, la ecuación diferencial tiene una solución única para el valor inicial dado.
+
+Para encontrar la solución general, podemos utilizar el método de variación de parámetros. Primero, encontramos la solución homogénea asociada a la ecuación diferencial:
+\begin{equation}
+y' + \frac{2}{t} y = 0.
+\end{equation}
+Separando las variables, obtenemos:
+\begin{equation}
+\frac{dy}{y}(t) = - \frac{2}{t} dt,
+\end{equation}
+integrando ambos lados, obtenemos:
+\begin{equation}
+\log|y(t)| = -2 \log|t| + \log|C| \implies \log|y(t)| = \log |Ct^{-2}|,
+\end{equation}
+y por lo tanto,
+\begin{equation}
+y(t) = C t^{-2}.
+\end{equation}
+Ahora, para encontrar la solución particular, utilizamos el método de variación de parámetros. Suponemos que la solución particular tiene la forma:
+\begin{equation}
+y_p(t) = u(t) t^{-2},
+\end{equation}
+donde $u(t)$ es una función a determinar. Derivando $y_p(t)$, obtenemos:
+\begin{equation}
+y_p'(t) = u'(t) t^{-2} + u(t) (-2) t^{-3}.
+\end{equation}
+Sustituyendo $y_p(t)$ y $y_p'(t)$ en la ecuación diferencial, obtenemos:
+\begin{equation}
+u'(t) t^{-2} + u(t) (-2) t^{-3} + \frac{2}{t} u(t) t^{-2} = t^2 e^t.
+\end{equation}
+Simplificando, obtenemos:
+\begin{equation}
+u'(t) t^{-2} = t^2 e^t, \implies u'(t) = t^4 e^t.
+\end{equation}
+Integrando ambos lados, obtenemos:
+\begin{equation}
+u(t) = \int t^4 e^t dt.
+\end{equation}
+Utilizando integración por partes de manera repetida, obtenemos:
+\begin{equation}
+u(t) = t^4 e^t - 4 t^3 e^t + 12 t^2 e^t - 24 t e^t + 24 e^t + C.
+\end{equation}
+Por lo tanto, la solución particular es:
+\begin{equation}
+y_p(t) = u(t) t^{-2} = (t^4 e^t - 4 t^3 e^t + 12 t^2 e^t - 24 t e^t + 24 e^t + C) t^{-2} = t^2 e^t - 4 t e^t + 12 e^t - 24 t^{-1} e^t + 24 t^{-2} e^t + C t^{-2}.
+\end{equation}
+La solución general de la ecuación diferencial es:
+\begin{equation}
+y(t) = y_h(t) + y_p(t) = C t^{-2} + t^2 e^t - 4 t e^t + 12 e^t - 24 t^{-1} e^t + 24 t^{-2} e^t.
+\end{equation}
+Utilizando la condición inicial $y(1) = \sqrt{2} e$, obtenemos:
+\begin{equation}
+\sqrt{2} e = C + e - 4 e + 12 e - 24 e + 24 e = C + 9 e,
+\end{equation}
+lo que implica que $C = \sqrt{2} e - 9 e = (\sqrt{2} - 9) e$. Por lo tanto, la solución única es:
+\begin{equation}
+y(t) = (\sqrt{2} - 9) e t^{-2} + t^2 e^t - 4 t e^t + 12 e^t - 24 t^{-1} e^t + 24 t^{-2} e^t.
+\end{equation}
+
+En la siguiente gráfica se muestra la solución de la ecuación diferencial ordinaria $y' = - \frac{2}{t} y + t^2 e^t$ con la condición inicial $y(1) = \sqrt{2} e$.
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+y_sol = lambda t: ((np.sqrt(2) - 9) * np.exp(1) * t**(-2) + t**2 * np.exp(t) - 4 * t * np.exp(t) + 12 * np.exp(t) - 24 * t**(-1) * np.exp(t) + 24 * t**(-2) * np.exp(t))
+
+t_values = np.linspace(1, 2, 100)
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_values, y_sol(t_values), label='y(t)')
+plt.xlabel('t')
+plt.ylabel('y(t)/y\'(t)')
+plt.legend()
+plt.grid()
+plt.show()
+```
+
+:::
+
+
+::: {#exm-lipschitz_3}
+
+$y' = 1-2y$, con $y(0) = \frac{5}{2}$ y $t \in [0, 3]$.
+
+
+En este caso, la función $f(t, y) = 1 - 2y$ es continua en el intervalo dado y
+\begin{equation}
+\left|\frac{\partial f}{\partial y}(t,y)\right| = |-2| = 2.
+\end{equation}
+Por lo tanto, por el teorema de existencia y unicidad, la ecuación diferencial tiene una solución única para el valor inicial dado. 
+
+Para encontrar la solución general, podemos separar las variables:
+\begin{equation}
+\frac{dy}{1 - 2y}(t) = dt.
+\end{equation}
+Integrando ambos lados, obtenemos:
+\begin{equation}
+-\frac{1}{2} \log|1 - 2y(t)| = t + C_1,
+\end{equation}y por lo tanto,
+\begin{equation}
+\log|1-2y(t)|=-2t-2C_1 \implies 1-2y(t) = e^{-2t - 2C_1} \implies y(t) = Ce^{-2t}+\frac{1}{2}.
+\end{equation}
+Utilizando la condición inicial $y(0) = \frac{5}{2}$, obtenemos:
+\begin{equation}
+\frac{5}{2} = C + \frac{1}{2} \implies C = 2.
+\end{equation}
+Por lo tanto, la solución única es:
+\begin{equation}
+y(t) = 2 e^{-2t} + \frac{1}{2}.
+\end{equation}
+En la siguiente gráfica se muestra la solución de la ecuación diferencial ordinaria $y' = 1 - 2y$ con la condición inicial $y(0) = \frac{5}{2}$.
+
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+y_sol = lambda t: 2 * np.exp(-2 * t) + 0.5
+t_values = np.linspace(0, 3, 100)
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_values, y_sol(t_values), label='y(t)')
+plt.xlabel('t')
+plt.ylabel('y(t)')
+plt.legend()
+plt.grid()
+plt.show()
+```
+
+:::
+
+
+::: {#exm-lipschitz_4}
+
+$y' + 9y = 4$, con $y(0) = 0$, determinar el intervalo donde la solución es válida.
+
+:::
+
+
+::: {#exm-lipschitz_5}
+
+$y' = e^{2t}-3y$, con $y(0) = 1$, determinar el intervalo donde la solución es válida.
+
+:::
