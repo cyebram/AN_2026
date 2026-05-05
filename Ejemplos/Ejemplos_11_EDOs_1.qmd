@@ -1,5 +1,5 @@
 ---
-title: "Ejemplos 11. EDOs y Método de Euler"
+title: "Ejemplos 11. EDOs: Métodos de Euler y Runge-Kutta"
 lang: es
 format:
   html:
@@ -55,27 +55,58 @@ lo que implica que $C = 0$. Por lo tanto, la solución única es:
 y(t) = e^{\sin(t)}.
 \end{equation}
 
-En la siguiente gráfica se muestra la solución de la ecuación diferencial ordinaria $y' = y \cos(t)$ con la condición inicial $y(0) = 1$, la aproximación utilizando el método de Euler y la derivada de la solución exacta.
+Antes de brindar la gráfica de la solución exacta, se declara una función para los métodos de Euler y Runge-Kutta de orden 4, que se utilizarán para aproximar la solución de la ecuación diferencial ordinaria dada. Los argumentos de la función son: $f$, la función que define la ecuación diferencial; $a$ y $b$, los extremos del intervalo; $cini$, el valor inicial; y $h$, el tamaño del paso para la aproximación. La función devuelve dos arreglos, uno con los valores de $t$ y otro con los valores de la aproximación $y$ correspondientes a cada valor de $t$.
+
+```{python}
+def my_euler(f, a,b, cini, h):
+  t_euler = np.arange(a, b + h, h)
+  y_euler = np.zeros_like(t_euler)
+  y_euler[0] = cini
+  for i in range(1, len(t_euler)):
+    y_euler[i] = y_euler[i-1] + h * f(t_euler[i-1], y_euler[i-1])
+  return t_euler, y_euler
+
+def my_rk4(f, a, b, cini, h):
+  t_rk4 = np.arange(a, b + h, h)
+  y_rk4 = np.zeros_like(t_rk4)
+  y_rk4[0] = cini
+  for i in range(1, len(t_rk4)):
+    k1 = h * f(t_rk4[i-1], y_rk4[i-1])
+    k2 = h * f(t_rk4[i-1] + h/2, y_rk4[i-1] + k1/2)
+    k3 = h * f(t_rk4[i-1] + h/2, y_rk4[i-1] + k2/2)
+    k4 = h * f(t_rk4[i-1] + h, y_rk4[i-1] + k3)
+    y_rk4[i] = y_rk4[i-1] + (k1 + 2*k2 + 2*k3 + k4) / 6
+  return t_rk4, y_rk4
+
+```
+
+
+
+En la siguiente gráfica se muestra la solución de la ecuación diferencial ordinaria $y' = y \cos(t)$ con la condición inicial $y(0) = 1$, las aproximaciones utilizando los métodos de Euler y Runge-Kutta de orden 4 con tamaños de paso $h=0.1$ y $h=0.05$, y la derivada de la solución exacta.
 
 ```{python}
 #| code-fold: true
 #| fig-align: "center"
 
+def f(t,y):
+  return y*np.cos(t)
+
 y_sol = lambda t: np.exp(np.sin(t))
 y_deriv = lambda t: y_sol(t) * np.cos(t)
 t_values = np.linspace(0, 1, 100)
 
-h = 0.1
-t_euler = np.arange(0, 1 + h, h)
-y_euler = np.zeros_like(t_euler)
-y_euler[0] = 1
-for i in range(1, len(t_euler)):
-    y_euler[i] = y_euler[i-1] + h * y_euler[i-1] * np.cos(t_euler[i-1])
+t_01, y_01 = my_euler(f, 0,1, 1, h=0.1)  
+t_005, y_005 = my_euler(f, 0,1, 1, h=0.05)
+t_rk4_01, y_rk4_01 = my_rk4(f, 0,1, 1, h=0.1)
+t_rk4_005, y_rk4_005 = my_rk4(f, 0,1, 1, h=0.05)
 
 
 plt.figure(figsize=(8, 5))
 plt.plot(t_values, y_sol(t_values), label='y(t)')
-plt.plot(t_euler, y_euler, 'o-', label='Aprox Euler')
+plt.plot(t_01, y_01, 'o-', label='h=0.1')
+plt.plot(t_005, y_005, 'o-', label='h=0.05')
+plt.plot(t_rk4_01, y_rk4_01, 's-', label='RK4 h=0.1')
+plt.plot(t_rk4_005, y_rk4_005, 's-', label='RK4 h=0.05')
 plt.plot(t_values, y_deriv(t_values), label="y'(t)", linestyle='--')
 plt.xlabel('t')
 plt.ylabel('y(t)/y\'(t)')
@@ -87,16 +118,17 @@ plt.show()
 
 ```
 
-**Gráfica del error absoluto de la aproximación utilizando el método de Euler:**
+**Gráfica del error absoluto de la aproximación utilizando los métodos numéricos**
 
 ```{python}
 #| code-fold: true
 #| fig-align: "center"
 
-error_euler = np.abs(y_sol(t_euler) - y_euler)
-
 plt.figure(figsize=(8, 5))
-plt.plot(t_euler, error_euler, 'o-', label='Error Absoluto')
+plt.plot(t_01, np.abs(y_sol(t_01) - y_01), 'o-', label='h=0.1')
+plt.plot(t_005, np.abs(y_sol(t_005) - y_005), 'o-', label='h=0.05')
+plt.plot(t_rk4_01, np.abs(y_sol(t_rk4_01) - y_rk4_01), 's-', label='RK4 h=0.1')
+plt.plot(t_rk4_005, np.abs(y_sol(t_rk4_005) - y_rk4_005), 's-', label='RK4 h=0.05')
 plt.xlabel('t')
 plt.ylabel('Error Absoluto')
 plt.axhline(0, color='black', lw=1, ls='--')
@@ -184,18 +216,56 @@ En la siguiente gráfica se muestra la solución de la ecuación diferencial ord
 #| code-fold: true
 #| fig-align: "center"
 
+def f(t,y):
+  return -2/t*y+t**2*np.exp(t)
+
+
+
+t_01, y_01 = my_euler(f, 1,2, np.sqrt(2)*np.exp(1), h=0.1)  
+t_005, y_005 = my_euler(f, 1,2, np.sqrt(2)*np.exp(1), h=0.05)
+t_rk4_01, y_rk4_01 = my_rk4(f, 1,2, np.sqrt(2)*np.exp(1), h=0.1)
+t_rk4_005, y_rk4_005 = my_rk4(f, 1,2, np.sqrt(2)*np.exp(1), h=0.05)
+
 y_sol = lambda t: ((np.sqrt(2) - 9) * np.exp(1) * t**(-2) + t**2 * np.exp(t) - 4 * t * np.exp(t) + 12 * np.exp(t) - 24 * t**(-1) * np.exp(t) + 24 * t**(-2) * np.exp(t))
 
 t_values = np.linspace(1, 2, 100)
 
 plt.figure(figsize=(8, 5))
 plt.plot(t_values, y_sol(t_values), label='y(t)')
+plt.plot(t_01, y_01, 'o-', label ="h=0.1")
+plt.plot(t_005, y_005, 'o-', label ="h=0.05")
+plt.plot(t_rk4_01, y_rk4_01, 's-', label='RK4 h=0.1')
+plt.plot(t_rk4_005, y_rk4_005, 's-', label='RK4 h=0.05')
 plt.xlabel('t')
 plt.ylabel('y(t)/y\'(t)')
 plt.legend()
 plt.grid()
 plt.show()
 ```
+
+**Gráfica del error absoluto de la aproximación utilizando los métodos numéricos:**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_01, np.abs(y_sol(t_01)- y_01), 'o-', label='h=0.1')
+plt.plot(t_005, np.abs(y_sol(t_005)- y_005), 'o-', label='h=0.05')
+plt.plot(t_rk4_01, np.abs(y_sol(t_rk4_01) - y_rk4_01), 's-', label='RK4 h=0.1')
+plt.plot(t_rk4_005, np.abs(y_sol(t_rk4_005) - y_rk4_005), 's-', label='RK4 h=0.05')
+plt.xlabel('t')
+plt.ylabel('Error Absoluto')
+plt.axhline(0, color='black', lw=1, ls='--')
+#plt.axvline(0, color='black', lw=1, ls='--')
+plt.legend()
+plt.grid()
+plt.show()
+
+```
+
+
 
 :::
 
@@ -240,14 +310,54 @@ En la siguiente gráfica se muestra la solución de la ecuación diferencial ord
 y_sol = lambda t: 2 * np.exp(-2 * t) + 0.5
 t_values = np.linspace(0, 3, 100)
 
+def f(t,y):
+  return 1-2*y
+
+t_01, y_01 = my_euler(f, 0, 3, 5/2, h=0.1)
+t_005, y_005 = my_euler(f, 0, 3, 5/2, h=0.05)
+t_rk4_01, y_rk4_01 = my_rk4(f, 0, 3, 5/2, h=0.1)
+t_rk4_005, y_rk4_005 = my_rk4(f, 0, 3, 5/2, h=0.05)
+
+
+
 plt.figure(figsize=(8, 5))
 plt.plot(t_values, y_sol(t_values), label='y(t)')
+plt.plot(t_01, y_01, 'o-', ms =3, label = "h=0.1")
+plt.plot(t_005, y_005, 'o-', ms =3, label = "h=0.05")
+plt.plot(t_rk4_01, y_rk4_01, 's-', label='RK4 h=0.1')
+plt.plot(t_rk4_005, y_rk4_005, 's-', label='RK4 h=0.05')
 plt.xlabel('t')
 plt.ylabel('y(t)')
 plt.legend()
 plt.grid()
 plt.show()
 ```
+
+**Gráfica del error absoluto de la aproximación utilizando los métodos numéricos:**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_01, np.abs(y_sol(t_01)- y_01), 'o-', label='h=0.1')
+plt.plot(t_005, np.abs(y_sol(t_005)- y_005), 'o-', label='h=0.05')
+plt.plot(t_rk4_01, np.abs(y_sol(t_rk4_01) - y_rk4_01), 's-', label='RK4 h=0.1')
+plt.plot(t_rk4_005, np.abs(y_sol(t_rk4_005) - y_rk4_005), 's-', label='RK4 h=0.05')
+plt.xlabel('t')
+plt.ylabel('Error Absoluto')
+plt.axhline(0, color='black', lw=1, ls='--')
+#plt.axvline(0, color='black', lw=1, ls='--')
+plt.legend()
+plt.grid()
+plt.show()
+
+```
+
+
+
+
 
 :::
 
@@ -256,11 +366,160 @@ plt.show()
 
 $y' + 9y = 4$, con $y(0) = 0$, determinar el intervalo donde la solución es válida.
 
+Al escribir la ecuación diferencial en la forma estándar, obtenemos:
+\begin{equation}
+y' = -9y + 4.
+\end{equation}
+
+En este caso, la función $f(t, y) = -9y + 4$ es continua en el intervalo dado y
+\begin{equation}
+\left|\frac{\partial f}{\partial y}(t,y)\right| = |-9| = 9.
+\end{equation}
+
+Por lo tanto, por el teorema de existencia y unicidad, la ecuación diferencial tiene una solución única para el valor inicial dado, y la solución es válida para todo $t \in [0, \infty)$.
+
+Al separar las variables y resolver la ecuación diferencial con la condición inicial, obtenemos la solución única:
+\begin{equation}
+y(t) = \frac{4}{9} - \frac{4}{9} e^{-9t}.
+\end{equation}
+
+Notemos que 
+\begin{equation}
+\lim_{t \to \infty} y(t) = \frac{4}{9},
+\end{equation}
+lo que implica que la solución se estabiliza en el valor $\frac{4}{9}$ a medida que $t$ crece.
+
+
+**Gráfica de la solución y aproximación utilizando los métodos numéricos.**
+
+Dado que la solución es válida para todo $t \in [0, \infty)$, se muestra la gráfica de la solución de la ecuación diferencial ordinaria $y' + 9y = 4$ con la condición inicial $y(0) = 0$ en el intervalo $[0, 1]$.
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+y_sol = lambda t: 4/9 - (4/9)*np.exp(-9*t)
+t_values = np.linspace(0, 1, 100)
+
+def f(t,y):
+  return -9*y+4
+
+t_01, y_01 = my_euler(f, 0, 1, 0, h=0.1)
+t_005, y_005 = my_euler(f, 0, 1, 0, h=0.05)
+t_rk4_01, y_rk4_01 = my_rk4(f, 0, 1, 0, h=0.1)
+t_rk4_005, y_rk4_005 = my_rk4(f, 0, 1, 0, h=0.05)
+
+
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_values, y_sol(t_values), label='y(t)')
+plt.plot(t_01, y_01, 'o-', ms =4, label = "h=0.1")
+plt.plot(t_005, y_005, 'o-', ms =4, label = "h=0.05")
+plt.plot(t_rk4_01, y_rk4_01, 's-', label='RK4 h=0.1')
+plt.plot(t_rk4_005, y_rk4_005, 's-', label='RK4 h=0.05')
+plt.xlabel('t')
+plt.ylabel('y(t)')
+plt.legend()
+plt.grid()
+plt.show()
+```
+
+**Gráfica del error absoluto de la aproximación utilizando los métodos numéricos:**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_01, np.abs(y_sol(t_01)- y_01), 'o-', label='h=0.1')
+plt.plot(t_005, np.abs(y_sol(t_005)- y_005), 'o-', label='h=0.05')
+plt.plot(t_rk4_01, np.abs(y_sol(t_rk4_01) - y_rk4_01), 's-', label='RK4 h=0.1')
+plt.plot(t_rk4_005, np.abs(y_sol(t_rk4_005) - y_rk4_005), 's-', label='RK4 h=0.05')
+plt.xlabel('t')
+plt.ylabel('Error Absoluto')
+plt.axhline(0, color='black', lw=1, ls='--')
+plt.axvline(0, color='black', lw=1, ls='--')
+plt.legend()
+plt.grid()
+plt.show()
+
+```
+
+
+
 :::
 
 
 ::: {#exm-lipschitz_5}
 
 $y' = e^{2t}-3y$, con $y(0) = 1$, determinar el intervalo donde la solución es válida.
+
+El problema de valor inicial dado es un caso particular de la ecuación diferencial ordinaria de primer orden, y la función $f(t, y) = e^{2t} - 3y$ es continua en el intervalo dado. Además,
+\begin{equation}
+\left|\frac{\partial f}{\partial y}(t,y)\right| = |-3| = 3.
+\end{equation}
+
+Por lo tanto, por el teorema de existencia y unicidad, la ecuación diferencial tiene una solución única para el valor inicial dado, y la solución es válida para todo $t \in [0, \infty)$.
+
+Al separar las variables y resolver la ecuación diferencial con la condición inicial, obtenemos la solución única:
+
+\begin{equation}
+y(t) = \frac{4}{5} e^{-3t} + \frac{1}{5} e^{2t}.
+\end{equation}
+
+
+**Gráfica de la solución y aproximación utilizando los métodos numéricos en el intervalo $[0,3]$.**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+y_sol = lambda t: 0.8*np.exp(-3*t)+0.2*np.exp(2*t)
+t_values = np.linspace(0, 3, 100)
+
+def f(t,y):
+  return np.exp(2*t)-3*y
+
+t_01, y_01 = my_euler(f, 0, 3 , 1, h=0.1)
+t_005, y_005 = my_euler(f, 0, 3, 1, h=0.05)
+t_rk4_01, y_rk4_01 = my_rk4(f, 0, 3, 1, h=0.1)
+t_rk4_005, y_rk4_005 = my_rk4(f, 0, 3, 1, h=0.05)
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_values, y_sol(t_values), label='y(t)')
+plt.plot(t_01, y_01, 'o-', label = "h=0.1")
+plt.plot(t_005, y_005, 'o-', label = "h=0.05")
+plt.plot(t_rk4_01, y_rk4_01, 's-', label='RK4 h=0.1')
+plt.plot(t_rk4_005, y_rk4_005, 's-', label='RK4 h=0.05')
+#plt.yscale('log')
+plt.xlabel('t')
+plt.ylabel('y(t)')
+plt.legend()
+plt.grid()
+plt.show()
+```
+
+**Gráfica del error absoluto de la aproximación utilizando los métodos numéricos:**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_01, np.abs(y_sol(t_01)- y_01), 'o-', label='h=0.1')
+plt.plot(t_005, np.abs(y_sol(t_005)- y_005), 'o-', label='h=0.05')
+plt.plot(t_rk4_01, np.abs(y_sol(t_rk4_01) - y_rk4_01), 's-', label='RK4 h=0.1')
+plt.plot(t_rk4_005, np.abs(y_sol(t_rk4_005) - y_rk4_005), 's-', label='RK4 h=0.05')
+plt.xlabel('t')
+plt.ylabel('Error Absoluto')
+plt.axhline(0, color='black', lw=1, ls='--')
+#plt.axvline(0, color='black', lw=1, ls='--')
+plt.legend()
+plt.grid()
+plt.show()
+
+```
 
 :::
