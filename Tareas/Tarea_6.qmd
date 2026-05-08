@@ -22,10 +22,9 @@ from scipy import integrate
 # Ejercicio 1
 
 La Ley de Enfriamiento de Newton establece que la tasa de enfriamiento de un objeto es proporcional a la diferencia de temperatura entre el objeto y su entorno. Supongamos que $t$ es el tiempo, $T$ es la temperatura del objeto, y $T_s$ es la temperatura del entorno. La siguiente ecuación diferencial describe la Ley de Newton:
-
-$$
+\begin{equation}
 \frac{dT}{dt} = k(T - T_s),
-$$
+\end{equation}
 
 donde $k$ es una constante.
 
@@ -35,22 +34,62 @@ Consideramos una taza de café a 95 °C en una habitación de 18 °C. Se sabe qu
 # Ejercicio 2
 
 Brinda una aproximación de la solución del siguiente problema con valor inicial.
-
-$$
+\begin{equation}
 y' = t -ty, \qquad y(1)=0.
-$$
+\end{equation}
 
 # Ejercicio 3
 
 Para la siguiente ecuación diferencial ordinaria de segundo orden con valores iniciales
-
-$$
+\begin{equation}
 u''-3u'-1.5 u= 8\,sen(3t), \qquad u(1)=-0.5, u'(1)=1
-$$
+\end{equation}
 
 Escribe el respectivo sistema de ecuaciones diferenciales de primer orden considerando que $v=u'(t)$ (velocidad) y posteriormente brinda la solución del sistema por medio de las funciones $u(t)$ y $v(t)$
 
 
+Esta ecuación diferencial ordinaria de segundo orden se puede reescribir como el siguiente sistema de primer orden:
+\begin{eqnarray}
+u' & = & v \\
+v' &=& 3v + 1.5u + 8\sin(3t)
+\end{eqnarray}
+
+con los valores iniciales $u(1)=-0.5$ y $v(1)=1$.
+
+A continuación se muestra la aproximación de la solución del sistema de ecuaciones diferenciales ordinarias de primer orden y las gráficas de las funciones $u(t)$ y $v(t)$. Notar que $v(t)$ es la derivada de $u(t)$ y esta última es la función que resuelve la ecuación diferencial ordinaria de segundo orden dada en el enunciado.
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+# Función que define el sistema de ecuaciones diferenciales ordinarias de primer orden
+def f(t, U):
+  u, v = U
+  return[v, 8*np.sin(3*t)+3*v+1.5*u]
+
+# Intervalo de tiempo y condiciones iniciales
+t0 = 1
+tf = 3
+s0 = [-0.5, 1]
+t_values = np.linspace(t0, tf, 200)
+
+# Aproximación de la solución del sistema de ecuaciones diferenciales ordinarias de primer orden
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval = t_values)
+
+# Gráfica de las funciones u(t) y v(t), notar que v(t) es la derivada de u(t) y esta última es la función que resuelve la ecuación diferencial ordinaria de segundo orden dada en el enunciado
+plt.figure(figsize=(8, 5))
+plt.plot(edo_sol.t, edo_sol.y[0], label = 'u(t)')
+plt.plot(edo_sol.t, edo_sol.y[1], label = 'v(t)')
+plt.xlabel('t')
+plt.ylabel('u/v')
+#plt.axhline(0, color='black', lw=1, ls='--')
+#plt.axvline(0, color='black', lw=1, ls='--')
+plt.legend()
+plt.grid()
+plt.show()
+```
+
+---
 
 <br>
 
@@ -60,126 +99,165 @@ Para cada una de las ecuaciones diferenciales ordinarias de segundo y tercer ord
 
 **Oscilador armónico simple**
 
-$$
+\begin{equation}
 y'' + 4y = 0,\quad y(0) = 1,\ y'(0) = 0
-$$
+\end{equation}
 
 # Ejercicio 5
 
 **Oscilador amortiguado**
 
-$$
+\begin{equation}
 y'' + 0.5y' + 4y = 0,\quad y(0) = 2,\ y'(0) = 0
-$$
+\end{equation}
 
 # Ejercicio 6
 
 **Oscilador forzado**
 
-$$
+\begin{equation}
 y'' + 2y' + y = \cos(t),\quad y(0) = 0,\ y'(0) = 1
-$$
+\end{equation}
 
 # Ejercicio 7
 
 **Ecuación no lineal de segundo orden**
 
-$$
+\begin{equation}
 y'' = -y^3 + \cos(t),\quad y(0) = 0,\ y'(0) = 0
-$$
+\end{equation}
 
 # Ejercicio 8
 
 **Amortiguamiento cuadrático**
 
-$$
+\begin{equation}
 y'' + y'^2 + y = 0,\quad y(0) = 1,\ y'(0) = -1
-$$
+\end{equation}
 
 # Ejercicio 9
 
 **Péndulo simple (no lineal)**
 
-$$
+\begin{equation}
 \theta'' + \sin(\theta) = 0,\quad \theta(0) = \frac{\pi}{4},\ \theta'(0) = 0
-$$
+\end{equation}
 
 # Ejercicio 10
 
 **Circuito RLC**
 
-$$
+\begin{equation}
 LQ'' + RQ' + \frac{1}{C}Q = V(t),\quad Q(0) = 0,\ Q'(0) = 0,\quad V(t) = \sin(t)
-$$
+\end{equation}
 
 Considera $L = 0.5$, $R = 2$ y $C = 5$ para este ejercicio.
+
+Considerando la derivada de la carga $Q$ como la corriente $I$, es decir, $I = Q'$, podemos reescribir la ecuación diferencial de segundo orden como el siguiente sistema de primer orden:
+\begin{eqnarray}
+Q' & = & I \\
+I' &=& \frac{1}{L}\left(\sin(t) - RI - \frac{1}{C}Q\right)
+\end{eqnarray}
+
+con las condiciones iniciales $Q(0) = 0$ y $I(0) = 0$. A continuación se muestra la aproximación de la solución del sistema de ecuaciones diferenciales ordinarias de primer orden y las gráficas de las funciones $Q(t)$ y $I(t)$. Notar que $I(t)$ es la derivada de $Q(t)$ y esta última es la función que resuelve la ecuación diferencial ordinaria de segundo orden dada en el enunciado.
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+def f(t, Q, L, R, C):
+  q, i = Q
+  return[i, (1/L)*(np.sin(t)-R*i+q/C)]
+
+L =0.5
+R = 2
+C= 5
+
+t0 = 0
+tf = 20
+s0 = [0, 0]
+t_values = np.linspace(t0, tf, 1000)
+
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval = t_values, args = (L, R, C))
+
+plt.figure(figsize=(8, 5))
+plt.plot(edo_sol.t, edo_sol.y[0], label = 'Q(t)')
+plt.plot(edo_sol.t, edo_sol.y[1], label = 'I(t)')
+plt.xlabel('t')
+plt.ylabel('Q/I')
+#plt.axhline(0, color='black', lw=1, ls='--')
+#plt.axvline(0, color='black', lw=1, ls='--')
+plt.legend()
+plt.grid()
+plt.show()
+
+```
 
 
 # Ejercicio 11
 
 **Ecuación de Bessel aproximada**
 
-$$
+\begin{equation}
 x^2y'' + xy' + (x^2 - 1)y = 0,\quad y(1) = 0.5,\ y'(1) = -0.1
-$$
+\end{equation}
 
 # Ejercicio 12
 
 **No lineal con exponencial**
 
-$$
+\begin{equation}
 y'' + y e^y = \sin(t),\quad y(0) = 0,\ y'(0) = 1
-$$
+\end{equation}
 
 # Ejercicio 13
 
 **Cuerda con fuerza externa**
 
-$$
+\begin{equation}
 y'' = -\pi^2 y + \cos(2\pi t),\quad y(0) = 1,\ y'(0) = 0
-$$
+\end{equation}
 
 # Ejercicio 14
 
 **EDO homogénea de tercer orden**
 
-$$
+\begin{equation}
 y''' - 3y'' + 3y' - y = 0,\quad y(0) = 1,\ y'(0) = 0,\ y''(0) = 1
-$$
+\end{equation}
 
 # Ejercicio 15
 
 **EDO de tercer orden con término no lineal**
 
-$$
+\begin{equation}
 y''' + y^2 = 0,\quad y(0) = 1,\ y'(0) = 0,\ y''(0) = 0
-$$
+\end{equation}
 
 # Ejercicio 16
 
 **Oscilador cúbico forzado**
 
-$$
+\begin{equation}
 y''' + y'' + y^3 = \cos(t),\quad y(0) = 0,\ y'(0) = 1,\ y''(0) = 0
-$$
-
+\end{equation}
 
 
 # Ejercicio 17
 
 **Ecuación tipo dispersión (Korteweg-de Vries simplificada)**
 
-$$
+\begin{equation}
 y''' - 6yy' = 0,\quad y(0) = 2,\ y'(0) = 0,\ y''(0) = -1
-$$
+\end{equation}
 
 # Ejercicio 18
 
 **Modelo no lineal de conducción**
 
-$$
+\begin{equation}
 y''' = -y y'' + y',\quad y(0) = 1,\ y'(0) = 0,\ y''(0) = -1
-$$
+\end{equation}
 
 # Ejercicio 19
 
@@ -227,121 +305,182 @@ Para cada uno de los sistemas de ecuaciones diferenciales ordinarias no lineales
 
 **Sistema logístico con depredación**
 
-$$
+\begin{equation}
 \begin{cases}
 \frac{dx}{dt} = x(1 - x) - xy \\
 \frac{dy}{dt} = -y + xy \\
 x(0) = 0.9,\quad y(0) = 0.1
 \end{cases}
-$$
+\end{equation}
 
 
 # Ejercicio 24
 
 **Oscilador de Van der Pol**
 
-$$
+\begin{equation}
 \begin{cases}
 \frac{dx}{dt} = y \\
 \frac{dy}{dt} = \mu (1 - x^2)y - x \\
 x(0) = 2,\quad y(0) = 0,\quad \mu = 3
 \end{cases}
-$$
+\end{equation}
+
+A continuación se muestra la aproximación de la solución del sistema de ecuaciones diferenciales ordinarias de primer orden y las gráficas de las funciones $x(t)$ y $y(t)$. 
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+def f(t, X, mu):
+  x, y = X
+  return[y, mu*(1-x**2)*y-x]
+
+
+mu = 3
+t0 = 0
+tf = 20
+s0 = [2, 0]
+t_values = np.linspace(t0, tf, 5000)
+
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval = t_values, args = (mu,))
+
+plt.figure(figsize=(8, 5))
+plt.plot(edo_sol.t, edo_sol.y[0], label = 'x(t)')
+plt.plot(edo_sol.t, edo_sol.y[1], label = 'y(t)')
+plt.xlabel('t')
+plt.ylabel('x/y')
+#plt.axhline(0, color='black', lw=1, ls='--')
+#plt.axvline(0, color='black', lw=1, ls='--')
+plt.legend()
+plt.grid()
+plt.show()
+
+```
+
+
+En este caso es posible observar que el sistema de ecuaciones diferenciales ordinarias de primer orden tiene un comportamiento oscilatorio, es decir, las funciones $x(t)$ y $y(t)$ oscilan con el tiempo. Este tipo de comportamiento es característico del oscilador de Van der Pol, donde la no linealidad introducida por el término $\mu (1 - x^2)y$ genera una dinámica compleja que puede incluir oscilaciones limitadas o incluso caos dependiendo del valor de $\mu$. Para observar cómo varía el comportamiento del sistema con diferentes valores de $\mu$, se pueden graficar las trayectorias para varios valores de $\mu$ y comparar los resultados. Estas trayectorias se denominan órbitas del oscilador, y pueden mostrar cómo el sistema evoluciona en el espacio de fases para diferentes condiciones iniciales y parámetros. A continuación se muestra la gráfica de las órbitas del oscilador de Van der Pol para varios valores de $\mu$.
+
+**Órbitas del oscilador**
+
+```{python}
+#| code-fold: true
+#| fig-align: "center"
+
+mu_s = [3, 5, 10, 15, 20]
+
+plt.figure(figsize=(8, 5))
+for mu in mu_s:
+  edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval = t_values, args = (mu,))
+  plt.plot(edo_sol.y[0], edo_sol.y[1], label = 'mu = ' + str(mu))
+plt.xlabel('x')
+plt.ylabel('y')
+#plt.axhline(0, color='black', lw=1, ls='--')
+#plt.axvline(0, color='black', lw=1, ls='--')
+plt.legend()
+plt.grid()
+plt.show()
+
+```
 
 
 # Ejercicio 25
 
 **Sistema de Lotka-Volterra**
 
-$$
+\begin{equation}
 \begin{cases}
 \frac{dx}{dt} = \alpha x - \beta xy \\
 \frac{dy}{dt} = \delta xy - \gamma y \\
 x(0) = 10,\quad y(0) = 5,\quad \alpha = 1.5,\ \beta = 1,\ \delta = 1,\ \gamma = 3
 \end{cases}
-$$
+\end{equation}  
+
 
 # Ejercicio 26
 
 **Interacción no lineal seno-coseno**
 
-$$
+\begin{equation}
 \begin{cases}
 \frac{dx}{dt} = \sin(y) - x^3 \\
 \frac{dy}{dt} = \cos(x) - y^2 \\
 x(0) = 1,\quad y(0) = 0
 \end{cases}
-$$
+\end{equation}
+
 
 # Ejercicio 27
 
 **FitzHugh-Nagumo (modelo de neurona)**
 
-$$
+\begin{equation}
 \begin{cases}
 \frac{dv}{dt} = v - \frac{v^3}{3} - w + I \\
 \frac{dw}{dt} = 0.08(v + 0.7 - 0.8w) \\
 v(0) = -1,\quad w(0) = 1,\quad I = 0.5
 \end{cases}
-$$
+\end{equation}
+
 
 # Ejercicio 28
 
 **Sistema no autónomo**
 
-$$
+\begin{equation}
 \begin{cases}
 \frac{dx}{dt} = x \sin(t) + y^2 \\
 \frac{dy}{dt} = -y \cos(t) + x \\
 x(0) = 1,\quad y(0) = -1
 \end{cases}
-$$
+\end{equation}
+
 
 # Ejercicio 29
 
 **Modelo epidemiológico SIR (en este caso no graficar la trayectoria)**
 
-$$
+\begin{equation}
 \begin{cases}
 \frac{dS}{dt} = -\beta S I \\
 \frac{dI}{dt} = \beta S I - \gamma I \\
 \frac{dR}{dt} = \gamma I \\
 S(0) = 0.99,\quad I(0) = 0.01,\quad R(0) = 0,\quad \beta = 0.5,\ \gamma = 0.1
 \end{cases}
-$$
+\end{equation}
 
 # Ejercicio 30
 
 **Crecimiento logístico cruzado**
 
-$$
+\begin{equation}
 \begin{cases}
 \frac{dx}{dt} = x(1 - x - 0.5y) \\
 \frac{dy}{dt} = y(1 - y - 0.3x) \\
 x(0) = 0.5,\quad y(0) = 0.2
 \end{cases}
-$$
+\end{equation}
 
 # Ejercicio 31
 
 **Movimiento en campo no lineal**
 
-$$
+\begin{equation}
 \begin{cases}
 \frac{dx}{dt} = y \\
 \frac{dy}{dt} = -\sin(x) - 0.5 y \\
 x(0) = \pi/2,\quad y(0) = 0
 \end{cases}
-$$
+\end{equation}
 
 # Ejercicio 32
 
 **Sistema no lineal acoplado**
 
-$$
+\begin{equation}
 \begin{cases}
 \frac{dx}{dt} = x(1 - x) - xy^2 \\
 \frac{dy}{dt} = y(1 - y) - x^2y \\
 x(0) = 0.8,\quad y(0) = 0.6
 \end{cases}
-$$
+\end{equation}
