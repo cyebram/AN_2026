@@ -1,0 +1,229 @@
+---
+title: "Tarea Optativa B."
+author: "Mi nombre"
+lang: es
+format: 
+  html:
+    grid:
+      body-width: 1200px
+---
+
+
+En los ejercicios 1-3 utilizar las funciones `fsolve` y `minimize` de `scipy.optimize` para obtener soluciones aproximadas. 
+
+## Ejercicio 1
+
+Aproxima la solución de los siguientes sistemas no lineales. Para cada inciso, grafica las curvas implícitas $f_1(x_1,x_2)=0$ y $f_2(x_1,x_2)=0$, indicando las soluciones encontradas.
+
+**(a)**
+
+\begin{eqnarray}
+4x_1^2 - 20x_1 + \frac{1}{4}x_2^2 + 8 &=& 0, \\
+\frac{1}{2}x_1 x_2^2 + 2x_1 - 5x_2 + 8 &=& 0.
+\end{eqnarray}
+
+**(b)**
+
+\begin{eqnarray}
+3x_1^2 - x_2^2 &=& 0, \\
+3x_1 x_2^2 - x_1^3 - 1 &=& 0.
+\end{eqnarray}
+
+**(c)**
+
+\begin{eqnarray}
+\log(x_1^2 + x_2^2) - \sin(x_1 x_2) &=& \log 2 + \log \pi, \\
+e^{x_1 - x_2} + \cos(x_1 x_2) &=& 0.
+\end{eqnarray}
+
+**(d)**
+
+\begin{eqnarray}
+\sin(4\pi x_1 x_2) - 2x_2 - x_1 &=& 0, \\
+\left(\frac{4\pi - 1}{4\pi}\right)(e^{2x_1} - e) + 4ex_2^2 - 2ex_1 &=& 0.
+\end{eqnarray}
+
+---
+
+## Ejercicio 2
+
+Aproxima la solución de los siguientes sistemas no lineales.
+
+**(a)**
+
+\begin{eqnarray}
+15x_1 + x_2^2 - 4x_3 &=& 13, \\
+x_1^2 + 10x_2 - x_3 &=& 11, \\
+x_2^3 - 25x_3 &=& -22.
+\end{eqnarray}
+
+**(b)**
+
+\begin{eqnarray}
+10x_1 - 2x_2^2 + x_2 - 2x_3 - 5 &=& 0, \\
+8x_2^2 + 4x_3^2 - 9 &=& 0, \\
+8x_2 x_3 + 4 &=& 0.
+\end{eqnarray}
+
+**(c)**
+
+\begin{eqnarray}
+x_1^3 + x_1^2 x_2 - x_1 x_3 + 6 &=& 0, \\
+e^{x_1} + e^{x_2} - x_3 &=& 0, \\
+x_2^2 - 2x_1 x_3 &=& 4.
+\end{eqnarray}
+
+**(d)**
+
+\begin{eqnarray}
+x_1 + \cos(x_1 x_2 x_3) - 1 &=& 0, \\
+(1 - x_1)^{1/4} + x_2 + 0.05x_3^2 - 0.15x_3 - 1 &=& 0, \\
+-x_1^2 - 0.1x_2^2 + 0.01x_2 + x_3 - 1 &=& 0.
+\end{eqnarray}
+
+---
+
+## Ejercicio 3
+
+Aproxima los mínimos de las siguientes funciones.
+
+**(a)** Grafica la superficie $z = g(x_1, x_2)$ indicando el mínimo encontrado.
+
+\begin{equation}
+g(x_1, x_2) = \cos(x_1 + x_2) + \sin x_1 + \cos x_2.
+\end{equation}
+
+**(b)** Grafica la superficie $z = g(x_1, x_2)$ indicando el mínimo encontrado.
+
+\begin{equation}
+g(x_1, x_2) = 100(x_1^2 - x_2)^2 + (1 - x_1)^2.
+\end{equation}
+
+**(c)**
+
+\begin{equation}
+g(x_1, x_2, x_3) = x_1^2 + 2x_2^2 + x_3^2 - 2x_1 x_2 + 2x_1 - 2.5x_2 - x_3 + 2.
+\end{equation}
+
+**(d)**
+
+\begin{equation}
+g(x_1, x_2, x_3) = x_1^4 + 2x_2^4 + 3x_3^4 + 1.01.
+\end{equation}
+
+---
+
+# Problemas de valor en la frontera para ecuaciones diferenciales ordinarias
+
+En esta tarea se presentan algunos problemas de valor en la frontera para ecuaciones diferenciales ordinarias. Consideraremos los problemas de valor en la frontera de dos puntos para la ecuación diferencial ordinaria de segundo orden de la forma
+\begin{equation}
+y'' = f(x, y, y'), \qquad a \leq x \leq b,
+\end{equation}
+junto con las condiciones de frontera
+\begin{equation}
+y(a) = \alpha, \qquad y(b) = \beta,
+\end{equation}
+donde $f$ es una función dada, y $\alpha$ y $\beta$ son constantes.
+
+## Ejercicio 4.
+
+Brinda la expresión de un problema lineal de valores en la frontera, enuncia el teorema de existencia y unicidad para este tipo de problemas, y explica el método de disparo lineal para brindar una solución aproximada. Consultar el archivo `BVP.pdf` del repositorio para obtener información adicional sobre este tema.
+
+---
+
+Para cada uno de los siguientes problemas de valor en la frontera, utiliza la función `solve_bvp` de `scipy.integrate` para obtener una solución aproximada en el intervalo indicado. En caso que se brinde la solución exacta, compara ambas soluciones por medio de una gráfica del error absoluto y discute la precisión del método.
+
+
+## Ejercicio 5.
+
+\begin{equation}
+y'' = 4(y-x), \qquad 0 \leq x \leq 1, \quad y(0) = 0, \quad y(1) = 2.
+\end{equation}
+
+Solución exacta: $y(x) = \frac{e^2}{e^4-1}(e^{2x} - e^{-2x})+x$.
+
+---
+
+## Ejercicio 6.
+
+\begin{equation}
+y'' = y' + 2y + \cos(x), \qquad 0 \leq x \leq \frac{\pi}{2}, \quad y(0) = -0.3, \quad y\left(\frac{\pi}{2}\right) = -0.1
+\end{equation}
+Solución exacta: $y(x) = -\frac{1}{10}(\sin(x) +3\, \cos(x))$.
+
+---
+
+## Ejercicio 7.
+
+\begin{equation}
+y'' + 4y = \cos(x), \qquad 0 \leq x \leq \frac{\pi}{4}, \quad y(0) = 0, \quad y\left(\frac{\pi}{4}\right) = 0.
+\end{equation}
+Solución exacta: $y(x) = -\frac{1}{3} \cos(2x)-\frac{\sqrt{2}}{6} \sin(2x)+ \frac{1}{3}\cos(x)$.
+
+---
+
+## Ejercicio 8.
+
+\begin{equation}
+y'' = -(y')^2 - y + \log(x), \qquad 1 \leq x \leq 2, \quad y(1) = 0, \quad y(2) = \log(2).
+\end{equation}
+Solución exacta: $y(x) = \log(x)$.
+
+---
+
+## Ejercicio 9.
+
+\begin{equation}
+y'' = y' \cos(x) - y \log(y), \qquad 0 \leq x \leq \frac{\pi}{2}, \quad y(0) = 1, \quad y\left(\frac{\pi}{2}\right) = e.
+\end{equation}
+Solución exacta: $y(x) = e^{\sin(x)}$.
+
+---
+
+## Ejercicio 10.
+
+\begin{equation}
+y'' = \frac{1}{2}(1- (y')^2-y \sin(x)), \qquad 0 \leq x \leq \pi, \quad y(0) = 2, \quad y(\pi) = 2.
+\end{equation}
+Solución exacta: $y(x) = 2 + \sin(x)$.
+
+---
+
+
+## Ejercicio 11.
+
+\begin{equation}
+y'' = 2y^3 -6y -2x^3, \qquad 1 \leq x \leq 2, \quad y(1) = 2, \quad y(2) = \frac{5}{2}.
+\end{equation}
+Solución exacta: $y(x) = x+\frac{1}{x}$.
+
+---
+
+## Ejercicio 12.
+
+\begin{equation}
+y'' = y'+2(y -\log(x))^3-\frac{1}{x} , \qquad 2 \leq x \leq 3, \quad y(2) = \frac{1}{2} + \log(2), \quad y(3) = \frac{1}{3} + \log(3).
+\end{equation}
+Solución exacta: $y(x) = \frac{1}{x} + \log(x)$.    
+
+---
+
+## Ejercicio 13.
+
+\begin{equation}
+y'' - \mu (y^2-1)y' + y =0, \qquad 0 \leq x \leq 2, \quad y(0) = 0, \quad y(2) = 1.
+\end{equation}
+Donde $\mu = 1/2$. 
+
+
+---
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,112 @@
+---
+title: "Tarea Optativa A."
+author: "Mi nombre"
+lang: es
+format: 
+  html:
+    grid:
+      body-width: 1200px
+---
+
+
+Utilizar las funciones `fsolve` y `minimize` de `scipy.optimize` para obtener soluciones aproximadas.
+
+## Ejercicio 1
+
+Aproxima la solución de los siguientes sistemas no lineales. Para cada inciso, grafica las curvas implícitas $f_1(x_1,x_2)=0$ y $f_2(x_1,x_2)=0$, indicando las soluciones encontradas.
+
+**(a)**
+
+\begin{eqnarray}
+4x_1^2 - 20x_1 + \frac{1}{4}x_2^2 + 8 &=& 0, \\
+\frac{1}{2}x_1 x_2^2 + 2x_1 - 5x_2 + 8 &=& 0.
+\end{eqnarray}
+
+**(b)**
+
+\begin{eqnarray}
+3x_1^2 - x_2^2 &=& 0, \\
+3x_1 x_2^2 - x_1^3 - 1 &=& 0.
+\end{eqnarray}
+
+**(c)**
+
+\begin{eqnarray}
+\log(x_1^2 + x_2^2) - \sin(x_1 x_2) &=& \log 2 + \log \pi, \\
+e^{x_1 - x_2} + \cos(x_1 x_2) &=& 0.
+\end{eqnarray}
+
+**(d)**
+
+\begin{eqnarray}
+\sin(4\pi x_1 x_2) - 2x_2 - x_1 &=& 0, \\
+\left(\frac{4\pi - 1}{4\pi}\right)(e^{2x_1} - e) + 4ex_2^2 - 2ex_1 &=& 0.
+\end{eqnarray}
+
+---
+
+## Ejercicio 2
+
+Aproxima la solución de los siguientes sistemas no lineales.
+
+**(a)**
+
+\begin{eqnarray}
+15x_1 + x_2^2 - 4x_3 &=& 13, \\
+x_1^2 + 10x_2 - x_3 &=& 11, \\
+x_2^3 - 25x_3 &=& -22.
+\end{eqnarray}
+
+**(b)**
+
+\begin{eqnarray}
+10x_1 - 2x_2^2 + x_2 - 2x_3 - 5 &=& 0, \\
+8x_2^2 + 4x_3^2 - 9 &=& 0, \\
+8x_2 x_3 + 4 &=& 0.
+\end{eqnarray}
+
+**(c)**
+
+\begin{eqnarray}
+x_1^3 + x_1^2 x_2 - x_1 x_3 + 6 &=& 0, \\
+e^{x_1} + e^{x_2} - x_3 &=& 0, \\
+x_2^2 - 2x_1 x_3 &=& 4.
+\end{eqnarray}
+
+**(d)**
+
+\begin{eqnarray}
+x_1 + \cos(x_1 x_2 x_3) - 1 &=& 0, \\
+(1 - x_1)^{1/4} + x_2 + 0.05x_3^2 - 0.15x_3 - 1 &=& 0, \\
+-x_1^2 - 0.1x_2^2 + 0.01x_2 + x_3 - 1 &=& 0.
+\end{eqnarray}
+
+---
+
+## Ejercicio 3
+
+Aproxima los mínimos de las siguientes funciones.
+
+**(a)** Grafica la superficie $z = g(x_1, x_2)$ indicando el mínimo encontrado.
+
+\begin{equation}
+g(x_1, x_2) = \cos(x_1 + x_2) + \sin x_1 + \cos x_2.
+\end{equation}
+
+**(b)** Grafica la superficie $z = g(x_1, x_2)$ indicando el mínimo encontrado.
+
+\begin{equation}
+g(x_1, x_2) = 100(x_1^2 - x_2)^2 + (1 - x_1)^2.
+\end{equation}
+
+**(c)**
+
+\begin{equation}
+g(x_1, x_2, x_3) = x_1^2 + 2x_2^2 + x_3^2 - 2x_1 x_2 + 2x_1 - 2.5x_2 - x_3 + 2.
+\end{equation}
+
+**(d)**
+
+\begin{equation}
+g(x_1, x_2, x_3) = x_1^4 + 2x_2^4 + 3x_3^4 + 1.01.
+\end{equation}
